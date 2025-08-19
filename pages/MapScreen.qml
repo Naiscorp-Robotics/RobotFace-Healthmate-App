@@ -74,7 +74,7 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: 20
-        source: "assets/map.png"
+        source: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/map.png"
         fillMode: Image.PreserveAspectFit
     }
 }
