@@ -1,6 +1,16 @@
 <RCC>
     <qresource prefix="/">
+        <file>Main.qml</file>
         <file>assets/blinking_face.mp4</file>
         <file>assets/j97.jpg</file>
+        <file>assets/map.png</file>
+        <file>pages/CareStepsScreen.qml</file>
+        <file>pages/ImageScreen.qml</file>
+        <file>pages/ResponseScreen.qml</file>
+        <file>pages/RobotFaceScreen.qml</file>
+        <file>pages/MapScreen.qml</file>
+        <file>components/ControlButton.qml</file>
+        <file>components/InputBox.qml</file>
+        <file>components/RobotEye.qml</file>
     </qresource>
 </RCC>

@@ -1,13 +1,26 @@
-#include "mainwindow.h"
-
-#include <QApplication>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QDir>
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QGuiApplication app(argc, argv);
     
-    MainWindow w;
-    w.show();
+    QQmlApplicationEngine engine;
     
-    return a.exec();
+    // Set the working directory to the application directory
+    QDir::setCurrent(QCoreApplication::applicationDirPath());
+    
+    // Load the main QML file
+    const QUrl url(QStringLiteral("qrc:/Main.qml"));
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [url](QObject *obj, const QUrl &objUrl) {
+        if (!obj && url == objUrl)
+            QCoreApplication::exit(-1);
+    }, Qt::QueuedConnection);
+    
+    engine.load(url);
+    
+    return app.exec();
 }

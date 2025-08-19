@@ -15,164 +15,219 @@ Item {
     signal responseChanged(string response)
     signal statusChanged(string status)
 
-    Rectangle {
+    // Video Player full màn hình
+    Video {
+        id: robotVideo
         anchors.fill: parent
-        color: "#1a1a1a"
+        source: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/blinking_face.mp4"
+        autoPlay: true
+        loops: MediaPlayer.Infinite
+        fillMode: VideoOutput.PreserveAspectFit
+    }
 
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 5
-            spacing: 5
+    // Overlay container cho tất cả controls
+    Item {
+        id: overlayContainer
+        anchors.fill: parent
+
+        // Header với title
+        Rectangle {
+            id: header
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 60
+            color: "transparent"
 
             Text {
+                anchors.centerIn: parent
                 text: "🤖 Robot Face Interface"
-                font.pixelSize: 16
+                font.pixelSize: 20
                 font.bold: true
                 color: "#ffffff"
-                Layout.alignment: Qt.AlignHCenter
+                style: Text.Outline
+                styleColor: "#000000"
+            }
+        }
+
+        // Bottom controls overlay
+        Rectangle {
+            id: bottomControls
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 260
+            color: "transparent"
+
+            // Semi-transparent background cho controls
+            Rectangle {
+                anchors.fill: parent
+                color: "#80000000"
+                radius: 15
             }
 
-            // Video Player thay cho mắt robot
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.preferredHeight: 0
-                color: "#000000"
-                radius: 3
-                border.width: 1
-                border.color: "#ffffff"
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 20
+                spacing: 15
 
-                // Video {
-                //     id: robotVideo
-                //     anchors.fill: parent
-                //     anchors.margins: 5
-                //     source: Qt.resolvedUrl("../assets/robot_face.mp4")
-                    
-                //     // Tự động phát và lặp lại
-                //     autoPlay: true
-                //     loops: MediaPlayer.Infinite
-                    
-                //     // Đảm bảo video hiển thị đúng tỷ lệ
-                //     fillMode: VideoOutput.PreserveAspectFit
+                // Input box
+                // InputBox {
+                //     Layout.fillWidth: true
+                //     Layout.preferredHeight: 70
+                //     onSendMessage: function(message) {
+                //         handleSendMessage(message)
+                //     }
                 // }
 
-                Video {
-                    id: robotVideo
-                    anchors.fill: parent
-                    anchors.margins: 2
-                    source: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/blinking_face.mp4"
-                    autoPlay: true
-                    loops: MediaPlayer.Infinite
-                    fillMode: VideoOutput.PreserveAspectFit
+                // Control buttons row
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 15
+
+                    // Reset button
+                    // Button {
+                    //     Layout.fillWidth: true
+                    //     Layout.preferredHeight: 40
+                    //     text: "Reset Memory "
+                    //     background: Rectangle {
+                    //         color: parent.pressed ? "#aa0000" : "#cc0000"
+                    //         radius: 8
+                    //     }
+                    //     contentItem: Text {
+                    //         text: parent.text
+                    //         color: "#ffffff"
+                    //         horizontalAlignment: Text.AlignHCenter
+                    //         verticalAlignment: Text.AlignVCenter
+                    //         font.pixelSize: 14
+                    //         font.bold: true
+                    //     }
+
+                    //     onClicked: resetMemory()
+                    // }
+
+                    // Open Image button
+                    // Button {
+                    //     Layout.fillWidth: true
+                    //     Layout.preferredHeight: 40
+                    //     text: "📷 Open Image"
+                    //     background: Rectangle {
+                    //         color: parent.pressed ? "#555555" : "#333333"
+                    //         radius: 8
+                    //     }
+                    //     contentItem: Text {
+                    //         text: parent.text
+                    //         color: "#ffffff"
+                    //         horizontalAlignment: Text.AlignHCenter
+                    //         verticalAlignment: Text.AlignVCenter
+                    //         font.pixelSize: 14
+                    //         font.bold: true
+                    //     }
+
+                    //     onClicked: {
+                    //         if (root.stackView) {
+                    //             root.stackView.push(Qt.resolvedUrl("ImageScreen.qml"), {
+                    //                 "stackView": root.stackView
+                    //             })
+                    //         }
+                    //     }
+                    // }
                 }
 
+                // Care Steps and Map buttons row
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 15
 
-                // Nút điều khiển video (tùy chọn)
-                Row {
-                    anchors.bottom: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.margins: 10
-                    spacing: 10
-                    visible: false // Ẩn nút điều khiển, chỉ hiện khi cần
-
+                    // Care Steps button
                     Button {
-                        text: robotVideo.playbackState === MediaPlayer.PlayingState ? "⏸️" : "▶️"
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 40
+                        text: "📋 Hướng dẫn chăm sóc"
+                        background: Rectangle {
+                            color: parent.pressed ? "#8e44ad" : "#9b59b6"
+                            radius: 8
+                        }
+                        contentItem: Text {
+                            text: parent.text
+                            color: "#ffffff"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            font.pixelSize: 13
+                            font.bold: true
+                        }
+
                         onClicked: {
-                            if (robotVideo.playbackState === MediaPlayer.PlayingState) {
-                                robotVideo.pause()
-                            } else {
-                                robotVideo.play()
+                            if (root.stackView) {
+                                root.stackView.push(Qt.resolvedUrl("CareStepsScreen.qml"), {
+                                    "stackView": root.stackView
+                                })
                             }
                         }
                     }
 
+                    // Map button
                     Button {
-                        text: "🔄"
-                        onClicked: robotVideo.position = 0
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 40
+                        text: "🗺️ Bản đồ"
+                        background: Rectangle {
+                            color: parent.pressed ? "#27ae60" : "#2ecc71"
+                            radius: 8
+                        }
+                        contentItem: Text {
+                            text: parent.text
+                            color: "#ffffff"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            font.pixelSize: 13
+                            font.bold: true
+                        }
+
+                        onClicked: {
+                            if (root.stackView) {
+                                root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
+                                    "stackView": root.stackView
+                                })
+                            }
+                        }
                     }
                 }
 
-                // Hiển thị thông báo nếu video không tải được
+                // Status
                 Text {
-                    anchors.centerIn: parent
-                    text: "Video không tải được\nVui lòng kiểm tra đường dẫn file"
-                    color: "#ffffff"
-                    font.pixelSize: 16
-                    horizontalAlignment: Text.AlignHCenter
-                    visible: robotVideo.status === MediaPlayer.InvalidMedia
+                    text: root.currentStatus
+                    font.pixelSize: 12
+                    color: "#cccccc"
+                    Layout.alignment: Qt.AlignHCenter
                 }
-                
-                // Debug info (ẩn khi video hoạt động)
-                Text {
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.margins: 10
-                    text: "Video Status: " + robotVideo.status + 
-                          "\nError: " + robotVideo.error + 
-                          "\nPlaying: " + (robotVideo.playbackState === MediaPlayer.PlayingState ? "Yes" : "No") +
-                          "\nDuration: " + Math.round(robotVideo.duration/1000) + "s" +
-                          "\nSource: " + robotVideo.source
-                    color: "#ffffff"
-                    font.pixelSize: 10
-                    visible: false // Ẩn debug text
-                }
-            }
-
-            // Input box
-            InputBox {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 60
-                onSendMessage: function(message) {
-                        handleSendMessage(message)
-                }
-            }
-
-            // Reset button
-            Button {
-                text: "Reset Memory"
-                Layout.fillWidth: true
-                Layout.preferredHeight: 30
-                background: Rectangle {
-                    color: parent.pressed ? "#aa0000" : "#cc0000"
-                    radius: 6
-                }
-                
-                onClicked: resetMemory()
-            }
-
-            // Open Image button
-            Button {
-                text: "📷 Open Image"
-                Layout.fillWidth: true
-                Layout.preferredHeight: 30
-                background: Rectangle {
-                    color: parent.pressed ? "#555555" : "#333333"
-                    radius: 6
-                }
-                contentItem: Text {
-                    text: parent.text
-                    color: "#ffffff"
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                
-                onClicked: {
-                    if (root.stackView) {
-                        root.stackView.push(Qt.resolvedUrl("ImageScreen.qml"), {
-                            "stackView": root.stackView
-                        })
-                    }
-                }
-            }
-
-            // Status
-            Text {
-                text: root.currentStatus
-                font.pixelSize: 10
-                color: "#888888"
-                Layout.alignment: Qt.AlignHCenter
             }
         }
+    }
+
+    // Hiển thị thông báo nếu video không tải được
+    Text {
+        anchors.centerIn: parent
+        text: "Video không tải được\nVui lòng kiểm tra đường dẫn file"
+        color: "#ffffff"
+        font.pixelSize: 16
+        horizontalAlignment: Text.AlignHCenter
+        visible: robotVideo.status === MediaPlayer.InvalidMedia
+    }
+
+    // Debug info (ẩn khi video hoạt động)
+    Text {
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.margins: 10
+        text: "Video Status: " + robotVideo.status +
+              "\nError: " + robotVideo.error +
+              "\nPlaying: " + (robotVideo.playbackState === MediaPlayer.PlayingState ? "Yes" : "No") +
+              "\nDuration: " + Math.round(robotVideo.duration/1000) + "s" +
+              "\nSource: " + robotVideo.source
+        color: "#ffffff"
+        font.pixelSize: 10
+        visible: false // Ẩn debug text
     }
 
     // Hàm gửi message
