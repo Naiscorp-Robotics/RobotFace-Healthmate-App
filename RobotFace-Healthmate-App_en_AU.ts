@@ -1,3 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="en_AU"></TS>
+<TS version="2.1" language="en_AU">
+<context>
+    <name>MainWindow</name>
+    <message>
+        <location filename="mainwindow.ui" line="14"/>
+        <location filename="build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug/RobotFace-Healthmate-App_autogen/include/ui_mainwindow.h" line="69"/>
+        <source>MainWindow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="37"/>
+        <location filename="build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug/RobotFace-Healthmate-App_autogen/include/ui_mainwindow.h" line="70"/>
+        <source>PushButton</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+</TS>
