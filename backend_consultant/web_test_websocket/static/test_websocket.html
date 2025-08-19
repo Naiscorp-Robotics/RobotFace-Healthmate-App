@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Test WebSocket API</title>
+</head>
+<body>
+  <h2>Test WebSocket API /ws/guide_bot/send_message</h2>
+
+  <input id="messageInput" type="text" placeholder="Nhập message..." size="50"/>
+  <button onclick="sendMessage()">Gửi</button>
+
+  <div id="log"></div>
+
+<script>
+  const ws = new WebSocket("ws://192.168.1.122:8989/ws/guide_bot/send_message");
+  const log = document.getElementById("log");
+
+  ws.onopen = () => {
+    log.innerHTML += "<p><em>WebSocket connected.</em></p>";
+  };
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+
+    if (data.status === "done") {
+      log.innerHTML += "<p><strong>Đã nhận xong dữ liệu.</strong></p>";
+      return;
+    }
+
+    // Hiển thị bước nhận được
+    const stepHTML = `
+      <div style="border:1px solid #ccc; margin: 10px; padding: 10px;">
+        <h3>Bước ${data.step_number}</h3>
+        <p>${data.step_description}</p>
+        <img src="data:image/png;base64,${data.img_base64}" alt="Instructional Image" style="max-width: 300px;"/>
+        <audio controls src="data:audio/wav;base64,${data.audio_base64}"></audio>
+      </div>
+    `;
+
+    log.innerHTML += stepHTML;
+  };
+
+  ws.onclose = () => {
+    log.innerHTML += "<p><em>WebSocket disconnected.</em></p>";
+  };
+
+  ws.onerror = (error) => {
+    console.error("WebSocket error:", error);
+    log.innerHTML += "<p><strong>WebSocket error</strong></p>";
+  };
+
+  function sendMessage() {
+    const msgInput = document.getElementById("messageInput");
+    const msg = msgInput.value.trim();
+    if (msg === "") {
+      alert("Nhập message trước đã!");
+      return;
+    }
+    const data = { message: msg };
+    ws.send(JSON.stringify(data));
+    log.innerHTML += `<p><em>Đã gửi: ${msg}</em></p>`;
+    msgInput.value = "";
+  }
+</script>
+</body>
+</html>
