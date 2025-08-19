@@ -197,3 +197,7 @@ This project contains both the original QML interface (migrated from RobotFaceBy
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+=======
+## License
+
+See LICENSE file for details.
