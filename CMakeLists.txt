@@ -1,14 +1,19 @@
-cmake_minimum_required(VERSION 3.14)
-project(QtWebRTCClient)
+cmake_minimum_required(VERSION 3.16)
 
+project(RobotFace-Healthmate-App VERSION 1.0.0 LANGUAGES CXX)
+
+# Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find Qt packages
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Multimedia MultimediaWidgets Network WebSockets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Multimedia MultimediaWidgets Network)
 if(NOT Qt6_FOUND)
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Multimedia MultimediaWidgets Network WebSockets)
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Multimedia MultimediaWidgets Network)
 endif()
+
+# Find ALSA library
+find_package(ALSA REQUIRED)
 
 # Enable Qt automoc, autouic, and autorcc
 set(CMAKE_AUTOMOC ON)
@@ -19,6 +24,7 @@ set(CMAKE_AUTORCC ON)
 set(SOURCES
     main.cpp
     mainwindow.cpp
+    audiomanager.cpp
 )
 
 set(QML_FILES
@@ -33,6 +39,7 @@ set(QML_FILES
 
 set(HEADERS
     mainwindow.h
+    audiomanager.h
 )
 
 set(FORMS
@@ -42,8 +49,6 @@ set(FORMS
 set(ASSETS
     assets/blinking_face.mp4
     assets/j97.jpg
-    signalingclient.cpp
-    webclient.cpp
 )
 
 # Create executable
@@ -55,26 +60,31 @@ add_executable(${PROJECT_NAME}
     ${ASSETS}
 )
 
-# Link Qt libraries
+# Link all libraries in a single target_link_libraries call
 if(Qt6_FOUND)
-    target_link_libraries(${PROJECT_NAME} 
-        Qt6::Core 
-        Qt6::Gui 
+    target_link_libraries(${PROJECT_NAME}
+        Qt6::Core
+        Qt6::Gui
         Qt6::Widgets
         Qt6::Multimedia
         Qt6::MultimediaWidgets
         Qt6::Network
+        ${ALSA_LIBRARIES}  # Add ALSA here
     )
 else()
-    target_link_libraries(${PROJECT_NAME} 
-        Qt5::Core 
-        Qt5::Gui 
+    target_link_libraries(${PROJECT_NAME}
+        Qt5::Core
+        Qt5::Gui
         Qt5::Widgets
         Qt5::Multimedia
         Qt5::MultimediaWidgets
         Qt5::Network
+        ${ALSA_LIBRARIES}  # Add ALSA here
     )
 endif()
+
+# Include directories for ALSA
+target_include_directories(${PROJECT_NAME} PRIVATE ${ALSA_INCLUDE_DIRS})
 
 # Platform-specific settings
 if(WIN32)
@@ -85,10 +95,3 @@ endif()
 
 # Copy assets to build directory
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
-
-find_package(Qt6 REQUIRED COMPONENTS Core Network WebSockets)
-add_executable(QtWebRTCClient main.cpp signalingclient.cpp webclient.cpp)
-
-target_link_libraries(QtWebRTCClient PRIVATE Qt6::Core Qt6::Network Qt6::WebSockets)
-# Thêm các thư viện WebRTC bạn đã build
-# target_link_libraries(QtWebRTCClient PRIVATE webrtc libwebrtc etc.)

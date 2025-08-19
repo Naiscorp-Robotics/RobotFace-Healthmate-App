@@ -2,21 +2,31 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QVideoWidget>
+#include <QMediaPlayer>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QTextEdit>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QLabel>
+#include <QStackedWidget>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QFileDialog>
 #include <QMessageBox>
-#include <QtNetwork/QTcpSocket>
-#include <QtNetwork/QHostAddress>
-#include <QDebug>
-#include <QString>
-#include <QWebSocket>
+#include "audiomanager.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
-
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
 public:
@@ -24,16 +34,61 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_btnConnect_clicked();
-    void on_btnSend_clicked();
-    void onConnected();
-    void onTextMessageReceived(const QString &message);
+    void onSendMessage();
+    void onResetMemory();
+    void onOpenImage();
+    void onBackToMain();
+    void onNetworkReplyFinished(QNetworkReply *reply);
+    void onNetworkError(QNetworkReply::NetworkError error);
+    void onStartAudioCapture();
+    void onStopAudioCapture();
+    void onPlayAudio();
+    void onAudioError(const QString &message);
+    void onAudioCaptureStarted();
+    void onAudioCaptureStopped();
+    void onAudioPlayed();
 
 private:
     Ui::MainWindow *ui;
+    QWidget *centralWidget;
+    QStackedWidget *stackedWidget;
+
+    // Main screen widgets
+    QWidget *mainScreen;
+    QVideoWidget *videoWidget;
+    QMediaPlayer *mediaPlayer;
+    QTextEdit *statusLabel;
+    QLineEdit *messageInput;
+    QPushButton *sendButton;
+    QPushButton *resetButton;
+    QPushButton *imageButton;
+    QPushButton *audioStartButton;
+    QPushButton *audioStopButton;
+    QPushButton *audioPlayButton;
+
+    // Response screen widgets
+    QWidget *responseScreen;
+    QTextEdit *responseText;
+    QPushButton *backButton;
+
+    // Image screen widgets
+    QWidget *imageScreen;
+    QLabel *imageLabel;
+    QPushButton *imageBackButton;
+
+    // Network
     QNetworkAccessManager *networkManager;
-    QTcpSocket *TCPSocket;
-    QWebSocket m_webSocket;
+
+    // Audio
+    AudioManager *audioManager;
+
+    void setupMainScreen();
+    void setupResponseScreen();
+    void setupImageScreen();
+    void sendNetworkRequest(const QString &endpoint, const QJsonObject &data);
+    void showResponse(const QString &response);
+    void updateStatus(const QString &status);
+    void updateAudioUI();
 };
 
 #endif // MAINWINDOW_H
