@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 import "./pages"
+import "./components"
 
 
 Window {
@@ -75,5 +76,15 @@ Window {
                 currentStatus = status
             }
         }
+    }
+
+    // WebSocket Panel (overlay)
+    WebSocketPanel {
+        anchors {
+            top: parent.top
+            right: parent.right
+            margins: 20
+        }
+        z: 1000  // Ensure it's on top
     }
 }

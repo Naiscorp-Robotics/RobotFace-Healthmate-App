@@ -1,15 +1,13 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.14)
+project(QtWebRTCClient)
 
-project(RobotFace-Healthmate-App VERSION 1.0.0 LANGUAGES CXX)
-
-# Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find Qt packages
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Multimedia WebSockets Network)
 if(NOT Qt6_FOUND)
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Multimedia)
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Multimedia WebSockets Network)
 endif()
 
 # Enable Qt automoc, autouic, and autorcc
@@ -20,6 +18,8 @@ set(CMAKE_AUTORCC ON)
 # Source files
 set(SOURCES
     main.cpp
+    websocketbridge.cpp
+    websocketbridge.h
 )
 
 set(RESOURCES
@@ -38,6 +38,8 @@ if(Qt6_FOUND)
         Qt6::Quick
         Qt6::QuickControls2
         Qt6::Multimedia
+        Qt6::Network
+        Qt6::WebSockets
     )
 else()
     target_link_libraries(${PROJECT_NAME} 
@@ -47,6 +49,8 @@ else()
         Qt5::Quick
         Qt5::QuickControls2
         Qt5::Multimedia
+        Qt5::Network
+        Qt5::WebSockets
     )
 endif()
 

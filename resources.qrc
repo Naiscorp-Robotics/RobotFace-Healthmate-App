@@ -12,5 +12,6 @@
         <file>components/ControlButton.qml</file>
         <file>components/InputBox.qml</file>
         <file>components/RobotEye.qml</file>
+        <file>components/WebSocketPanel.qml</file>
     </qresource>
 </RCC>

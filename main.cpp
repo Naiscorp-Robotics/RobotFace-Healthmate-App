@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QDir>
+#include "websocketbridge.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,6 +12,12 @@ int main(int argc, char *argv[])
     
     // Set the working directory to the application directory
     QDir::setCurrent(QCoreApplication::applicationDirPath());
+    
+    // Create and register WebSocket bridge
+    WebSocketBridge *websocketBridge = new WebSocketBridge(&engine);
+    
+    // Expose WebSocket bridge to QML
+    engine.rootContext()->setContextProperty("websocketBridge", websocketBridge);
     
     // Load the main QML file
     const QUrl url(QStringLiteral("qrc:/Main.qml"));
