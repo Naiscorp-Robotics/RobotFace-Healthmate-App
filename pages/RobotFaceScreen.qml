@@ -11,7 +11,11 @@ Item {
     property string currentResponse: ""
     property string currentStatus: "Ready to chat with robot..."
     property StackView stackView
+    property alias audioManager: audioManagerRef
 
+    AudioManager {
+        id: audioManagerRef
+    }
     signal responseChanged(string response)
     signal statusChanged(string status)
 

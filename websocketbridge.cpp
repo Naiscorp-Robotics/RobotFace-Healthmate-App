@@ -70,5 +70,3 @@ void WebSocketBridge::onWebSocketError(QAbstractSocket::SocketError error)
     emit logMessage(errorMsg);
     qDebug() << errorMsg;
 }
-
-

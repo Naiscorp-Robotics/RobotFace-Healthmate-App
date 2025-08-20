@@ -13,5 +13,6 @@
         <file>components/InputBox.qml</file>
         <file>components/RobotEye.qml</file>
         <file>components/WebSocketPanel.qml</file>
+        <file>components/AudioManager.qml</file>
     </qresource>
 </RCC>

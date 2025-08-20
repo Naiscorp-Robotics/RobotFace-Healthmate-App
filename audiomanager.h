@@ -1,0 +1,55 @@
+#ifndef AUDIOMANAGER_H
+#define AUDIOMANAGER_H
+
+#include <QObject>
+#include <alsa/asoundlib.h>
+#include <QByteArray>
+#include <QFile>
+#include <QAudioFormat>
+
+class AudioManager : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(bool isCapturing READ isCapturing NOTIFY isCapturingChanged)
+    Q_PROPERTY(bool hasRecordedData READ hasRecordedData NOTIFY hasRecordedDataChanged)
+
+public:
+    explicit AudioManager(QObject *parent = nullptr);
+    ~AudioManager();
+
+    Q_INVOKABLE bool startCapture();
+    Q_INVOKABLE void stopCapture();
+    Q_INVOKABLE bool playAudio();
+    Q_INVOKABLE bool saveToFile(const QString &filename);
+    Q_INVOKABLE bool loadFromFile(const QString &filename);
+
+    // SỬA: Thêm const và chỉ khai báo, implementation trong .cpp
+    bool isCapturing() const;
+    bool hasRecordedData() const;
+
+    // Thêm các phương thức format
+    Q_INVOKABLE int sampleRate() const { return 44100; }
+    Q_INVOKABLE int channelCount() const { return 1; }
+    Q_INVOKABLE int sampleSize() const { return 16; }
+
+signals:
+    void errorOccurred(const QString &message);
+    void captureStarted();
+    void captureStopped();
+    void audioPlayed();
+    void isCapturingChanged();
+    void hasRecordedDataChanged();
+    void recordingSaved(bool success);
+
+private:
+    void captureAudioData();
+    bool setupPlayback();
+
+    snd_pcm_t *m_captureHandle;
+    snd_pcm_t *m_playbackHandle;
+    bool m_isCapturing;
+    QByteArray m_audioBuffer;
+    QFile m_outputFile;
+};
+
+#endif // AUDIOMANAGER_H

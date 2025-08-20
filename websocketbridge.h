@@ -19,7 +19,7 @@ public:
     Q_INVOKABLE void disconnectFromServer();
     Q_INVOKABLE void sendMessage(const QString &message);
 
-    
+
     bool isConnected() const { return m_webSocket.state() == QAbstractSocket::ConnectedState; }
     QString lastMessage() const { return m_lastMessage; }
 
