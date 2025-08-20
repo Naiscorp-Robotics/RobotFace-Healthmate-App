@@ -14,7 +14,7 @@ TSSSocketBridge::TSSSocketBridge(QObject *parent)
     connect(&m_webSocket, &QWebSocket::connected, this, &TSSSocketBridge::onWebSocketConnected);
     connect(&m_webSocket, &QWebSocket::disconnected, this, &TSSSocketBridge::onWebSocketDisconnected);
     connect(&m_webSocket, &QWebSocket::textMessageReceived, this, &TSSSocketBridge::onWebSocketTextMessageReceived);
-    connect(&m_webSocket, &QWebSocket::errorOccurred, this, &TSSSocketBridge::onWebSocketError);
+    connect(&m_webSocket, static_cast<void(QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error), this, &TSSSocketBridge::onWebSocketError);
 }
 
 TSSSocketBridge::~TSSSocketBridge()

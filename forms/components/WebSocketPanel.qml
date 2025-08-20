@@ -1,6 +1,6 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 
 Rectangle {
     id: root
@@ -122,20 +122,25 @@ Rectangle {
 
     // Connect to WebSocket bridge signals
     Connections {
-        target: websocketBridge
+        target: websocketBridge ? websocketBridge : null
 
         function onLogMessage(message) {
-            logArea.text += "\n" + message
-            // Auto-scroll to bottom
-            logArea.cursorPosition = logArea.length
+            if (logArea && logArea.text !== undefined) {
+                logArea.text += "\n" + message
+                // Auto-scroll to bottom
+                logArea.cursorPosition = logArea.length
+            }
         }
 
         function onConnectionStatusChanged() {
             // Status will be updated automatically via property binding
+            console.log("WebSocket connection status changed: " + 
+                       (websocketBridge ? websocketBridge.isConnected : "unknown"))
         }
 
         function onMessageReceived(message) {
             // Handle received messages if needed
+            console.log("WebSocket message received: " + message)
         }
     }
 

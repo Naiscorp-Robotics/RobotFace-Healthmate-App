@@ -1,8 +1,8 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import QtMultimedia
-import QtQuick.Window
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
+import QtMultimedia 5.12
+import QtQuick.Window 2.12
 
 import "../components"
 
@@ -15,14 +15,41 @@ Item {
     signal responseChanged(string response)
     signal statusChanged(string status)
 
-    // Video Player full màn hình
-    Video {
+    // Optimized Video Player with GStreamer backend
+    OptimizedVideoPlayer {
         id: robotVideo
         anchors.fill: parent
-        source: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/blinking_face.mp4"
-        autoPlay: true
-        loops: MediaPlayer.Infinite
-        fillMode: VideoOutput.PreserveAspectFit
+        source: "qrc:/assets/blinking_face.mp4"
+        autoPlay: false
+        loops: -1 // infinite loops
+        
+        Component.onCompleted: {
+            console.log("Optimized video player loaded, source: " + source)
+            // Short delay before playing to ensure component is fully initialized
+            playTimer.start()
+        }
+        
+        onStarted: {
+            console.log("Video started")
+        }
+        
+        onStopped: {
+            console.log("Video stopped")
+        }
+        
+        onError: function(message) {
+            console.error("Video error: " + message)
+        }
+        
+        Timer {
+            id: playTimer
+            interval: 1000
+            repeat: false
+            onTriggered: {
+                console.log("Starting video playback after delay")
+                robotVideo.play()
+            }
+        }
     }
 
     // Overlay container cho tất cả controls
@@ -185,7 +212,7 @@ Item {
         color: "#ffffff"
         font.pixelSize: 16
         horizontalAlignment: Text.AlignHCenter
-        visible: robotVideo.status === MediaPlayer.InvalidMedia
+        visible: false // We'll handle errors via the OptimizedVideoPlayer's error signal
     }
 
     // Debug info (ẩn khi video hoạt động)
@@ -193,11 +220,8 @@ Item {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.margins: 10
-        text: "Video Status: " + robotVideo.status +
-              "\nError: " + robotVideo.error +
-              "\nPlaying: " + (robotVideo.playbackState === MediaPlayer.PlayingState ? "Yes" : "No") +
-              "\nDuration: " + Math.round(robotVideo.duration/1000) + "s" +
-              "\nSource: " + robotVideo.source
+        text: "Video Source: " + robotVideo.source +
+              "\nPlaying: " + (robotVideo.playing ? "Yes" : "No")
         color: "#ffffff"
         font.pixelSize: 10
         visible: false // Ẩn debug text

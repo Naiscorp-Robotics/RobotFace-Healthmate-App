@@ -1,18 +1,22 @@
-<RCC>
+<!DOCTYPE RCC>
+<RCC version="1.0">
     <qresource prefix="/">
         <file>Main.qml</file>
-        <file>assets/blinking_face.mp4</file>
-        <file>assets/j97.jpg</file>
-        <file>assets/map.png</file>
+        <file>pages/RobotFaceScreen.qml</file>
         <file>pages/CareStepsScreen.qml</file>
         <file>pages/ImageScreen.qml</file>
-        <file>pages/ResponseScreen.qml</file>
-        <file>pages/RobotFaceScreen.qml</file>
         <file>pages/MapScreen.qml</file>
+        <file>pages/ResponseScreen.qml</file>
         <file>components/ControlButton.qml</file>
         <file>components/InputBox.qml</file>
         <file>components/RobotEye.qml</file>
         <file>components/WebSocketPanel.qml</file>
         <file>components/TSSSocketPanel.qml</file>
+        <file>components/OptimizedVideoPlayer.qml</file>
+    </qresource>
+    <qresource prefix="/assets">
+        <file alias="blinking_face.mp4">../assets/blinking_face.mp4</file>
+        <file alias="j97.jpg">../assets/j97.jpg</file>
+        <file alias="map.png">../assets/map.png</file>
     </qresource>
 </RCC>

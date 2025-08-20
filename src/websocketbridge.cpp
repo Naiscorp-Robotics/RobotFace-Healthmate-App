@@ -1,4 +1,4 @@
-#include "websocketbridge.h"
+#include "../include/websocketbridge.h"
 #include <QDebug>
 #include <QUrl>
 #include <QTimer>
@@ -13,7 +13,7 @@ WebSocketBridge::WebSocketBridge(QObject *parent)
     connect(&m_webSocket, &QWebSocket::connected, this, &WebSocketBridge::onWebSocketConnected);
     connect(&m_webSocket, &QWebSocket::disconnected, this, &WebSocketBridge::onWebSocketDisconnected);
     connect(&m_webSocket, &QWebSocket::textMessageReceived, this, &WebSocketBridge::onWebSocketTextMessageReceived);
-    connect(&m_webSocket, &QWebSocket::errorOccurred, this, &WebSocketBridge::onWebSocketError);
+    connect(&m_webSocket, static_cast<void(QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error), this, &WebSocketBridge::onWebSocketError);
     
     // Auto-connect after a short delay to ensure the application is fully initialized
     if (m_autoConnect) {

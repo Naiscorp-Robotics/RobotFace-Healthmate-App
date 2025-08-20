@@ -1,14 +1,14 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import QtQuick.Window
-import "./pages"
-import "./components"
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
+import QtQuick.Window 2.12
+import "pages"
+import "components"
 
 
 Window {
-    width: Screen.width
-    height: Screen.height
+    width: 800
+    height: 600
     visible: true
     title: qsTr("Robot Face Interface")
     color: "#000000"
@@ -76,6 +76,17 @@ Window {
                 currentStatus = status
             }
         }
+        // RobotFaceScreen {
+        //     anchors.fill: parent
+        //     currentResponse: currentResponse
+        //     currentStatus: currentStatus
+        //     onResponseChanged: function(response) {
+        //         currentResponse = response
+        //     }
+        //     onStatusChanged: function(status) {
+        //         currentStatus = status
+        //     }
+        // }
     }
 
     // Connect to WebSocket bridge signals

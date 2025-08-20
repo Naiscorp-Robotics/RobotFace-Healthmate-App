@@ -1,6 +1,6 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 Item {
     id: root
@@ -12,27 +12,27 @@ Item {
         {
             title: "Bước 1: Kiểm tra sức khỏe tổng quát",
             description: "Bắt đầu bằng việc kiểm tra các chỉ số cơ bản như huyết áp, nhịp tim, nhiệt độ cơ thể. Đảm bảo bạn đang trong trạng thái ổn định trước khi thực hiện các bước tiếp theo.",
-            image: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/j97.jpg"
+            image: "qrc:/assets/j97.jpg"
         },
         {
             title: "Bước 2: Thực hiện bài tập thở",
             description: "Hít thở sâu và đều đặn trong 5-10 phút. Điều này giúp giảm căng thẳng, cải thiện tuần hoàn máu và tăng cường oxy cho não bộ.",
-            image: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/j97.jpg"
+            image: "qrc:/assets/j97.jpg"
         },
         {
             title: "Bước 3: Uống nước đầy đủ",
             description: "Uống ít nhất 8 ly nước mỗi ngày. Nước giúp thanh lọc cơ thể, duy trì nhiệt độ cơ thể và hỗ trợ các chức năng trao đổi chất.",
-            image: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/j97.jpg"
+            image: "qrc:/assets/j97.jpg"
         },
         {
             title: "Bước 4: Thực hiện bài tập thể dục nhẹ",
             description: "Thực hiện các động tác kéo giãn cơ bản trong 15-20 phút. Điều này giúp tăng cường sự linh hoạt và giảm đau nhức cơ bắp.",
-            image: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/j97.jpg"
+            image: "qrc:/assets/j97.jpg"
         },
         {
             title: "Bước 5: Nghỉ ngơi và thư giãn",
             description: "Dành thời gian nghỉ ngơi, có thể nghe nhạc nhẹ nhàng hoặc thiền định. Điều này giúp tâm trí được thư giãn và chuẩn bị cho giấc ngủ ngon.",
-            image: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/j97.jpg"
+            image: "qrc:/assets/j97.jpg"
         }
     ]
 
