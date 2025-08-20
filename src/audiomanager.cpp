@@ -323,3 +323,94 @@ bool AudioManager::hasRecordedData() const
 {
     return !m_audioBuffer.isEmpty();
 }
+
+QString AudioManager::getAudioAsBase64() const
+{
+    if (m_audioBuffer.isEmpty()) {
+        qDebug() << "AudioManager::getAudioAsBase64() - No audio data available";
+        return QString();
+    }
+    
+    QString base64Data = m_audioBuffer.toBase64();
+    qDebug() << "AudioManager::getAudioAsBase64() - Generated base64 data";
+    qDebug() << "  - Audio buffer size:" << m_audioBuffer.size() << "bytes";
+    qDebug() << "  - Base64 string length:" << base64Data.length() << "characters";
+    qDebug() << "  - Base64 preview:" << base64Data.left(50) + "...";
+    
+    return base64Data;
+}
+
+bool AudioManager::loadFromBase64(const QString &base64Data)
+{
+    if (base64Data.isEmpty()) {
+        emit errorOccurred("Base64 data is empty");
+        return false;
+    }
+    
+    QByteArray audioData = QByteArray::fromBase64(base64Data.toUtf8());
+    if (audioData.isEmpty()) {
+        emit errorOccurred("Failed to decode base64 data");
+        return false;
+    }
+    
+    m_audioBuffer = audioData;
+    emit hasRecordedDataChanged();
+    return true;
+}
+
+QString AudioManager::getWavAsBase64() const
+{
+    if (m_audioBuffer.isEmpty()) {
+        qDebug() << "AudioManager::getWavAsBase64() - No audio data available";
+        return QString();
+    }
+    
+    qDebug() << "AudioManager::getWavAsBase64() - Creating WAV file with base64 encoding";
+    qDebug() << "  - Audio buffer size:" << m_audioBuffer.size() << "bytes";
+    qDebug() << "  - Sample rate: 44100 Hz, Channels: 1, Bit depth: 16";
+    
+    // Create WAV header + audio data
+    QByteArray wavData;
+    QByteArray header(44, 0);
+
+    // RIFF header
+    header.replace(0, 4, "RIFF");
+    quint32 fileSize = m_audioBuffer.size() + 36;
+    header.replace(4, 4, reinterpret_cast<const char*>(&fileSize), 4);
+    header.replace(8, 4, "WAVE");
+
+    // fmt chunk
+    header.replace(12, 4, "fmt ");
+    quint32 fmtSize = 16;
+    header.replace(16, 4, reinterpret_cast<const char*>(&fmtSize), 4);
+    quint16 audioFormat = 1; // PCM
+    header.replace(20, 2, reinterpret_cast<const char*>(&audioFormat), 2);
+    quint16 numChannels = 1;
+    header.replace(22, 2, reinterpret_cast<const char*>(&numChannels), 2);
+    quint32 sampleRate = 44100;
+    header.replace(24, 4, reinterpret_cast<const char*>(&sampleRate), 4);
+    quint32 byteRate = sampleRate * numChannels * 2; // 16-bit = 2 bytes
+    header.replace(28, 4, reinterpret_cast<const char*>(&byteRate), 4);
+    quint16 blockAlign = numChannels * 2;
+    header.replace(32, 2, reinterpret_cast<const char*>(&blockAlign), 2);
+    quint16 bitsPerSample = 16;
+    header.replace(34, 2, reinterpret_cast<const char*>(&bitsPerSample), 2);
+
+    // data chunk
+    header.replace(36, 4, "data");
+    quint32 dataSize = m_audioBuffer.size();
+    header.replace(40, 4, reinterpret_cast<const char*>(&dataSize), 4);
+
+    // Combine header + audio data
+    wavData = header + m_audioBuffer;
+    
+    QString base64Data = wavData.toBase64();
+    
+    qDebug() << "AudioManager::getWavAsBase64() - WAV file created and encoded";
+    qDebug() << "  - WAV file size:" << wavData.size() << "bytes (header + audio)";
+    qDebug() << "  - Base64 string length:" << base64Data.length() << "characters";
+    qDebug() << "  - Base64 WAV preview:" << base64Data.left(50) + "...";
+    qDebug() << "  - Full Base64 WAV data:" << base64Data;
+    
+    return base64Data;
+}

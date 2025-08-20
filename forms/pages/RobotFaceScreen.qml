@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtMultimedia 5.12
 import QtQuick.Window 2.12
+import AudioController 1.0
 
 import "../components"
 
@@ -13,7 +14,7 @@ Item {
     property StackView stackView
     property alias audioManager: audioManagerRef
 
-    AudioManager {
+    AudioController {
         id: audioManagerRef
     }
     signal responseChanged(string response)
@@ -198,6 +199,38 @@ Item {
                         onClicked: {
                             if (root.stackView) {
                                 root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
+                                    "stackView": root.stackView
+                                })
+                            }
+                        }
+                    }
+                }
+
+                // Audio Test button row
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 15
+
+                    Button {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 40
+                        text: "🎤 Audio Recorder"
+                        background: Rectangle {
+                            color: parent.pressed ? "#f39c12" : "#e67e22"
+                            radius: 8
+                        }
+                        contentItem: Text {
+                            text: parent.text
+                            color: "#ffffff"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            font.pixelSize: 13
+                            font.bold: true
+                        }
+
+                        onClicked: {
+                            if (root.stackView) {
+                                root.stackView.push(Qt.resolvedUrl("../components/AudioManager.qml"), {
                                     "stackView": root.stackView
                                 })
                             }
@@ -411,6 +444,205 @@ Item {
                 root.stackView.push(Qt.resolvedUrl("CareStepsScreen.qml"), {
                     "stackView": root.stackView
                 })
+            }
+        }
+    }
+
+    // Audio Control Panel (overlay)
+    Rectangle {
+        id: audioControlPanel
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: 20
+        width: 200
+        height: 150
+        color: "#80000000"
+        radius: 10
+        visible: true
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: 10
+            spacing: 8
+
+            Text {
+                text: "🎤 Audio Controls"
+                color: "white"
+                font.bold: true
+                font.pixelSize: 12
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 10
+
+                Button {
+                    id: recordBtn
+                    text: audioManagerRef.isCapturing ? "⏹️ Stop" : "🔴 Record"
+                    width: 80
+                    height: 30
+                    background: Rectangle {
+                        color: parent.pressed ? "#e74c3c" : "#c0392b"
+                        radius: 5
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "white"
+                        font.pixelSize: 10
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    onClicked: {
+                        if (audioManagerRef.isCapturing) {
+                            audioManagerRef.stopCapture()
+                        } else {
+                            audioManagerRef.startCapture()
+                        }
+                    }
+                }
+
+                Button {
+                    text: "▶️ Play"
+                    width: 80
+                    height: 30
+                    enabled: audioManagerRef.hasRecordedData
+                    background: Rectangle {
+                        color: parent.enabled ? (parent.pressed ? "#27ae60" : "#2ecc71") : "#7f8c8d"
+                        radius: 5
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "white"
+                        font.pixelSize: 10
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    onClicked: {
+                        audioManagerRef.playAudio()
+                    }
+                }
+            }
+
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 5
+
+                Button {
+                    text: "📄 Base64"
+                    width: 70
+                    height: 25
+                    enabled: audioManagerRef.hasRecordedData
+                    background: Rectangle {
+                        color: parent.enabled ? (parent.pressed ? "#3498db" : "#2980b9") : "#7f8c8d"
+                        radius: 3
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "white"
+                        font.pixelSize: 8
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    onClicked: {
+                        var base64Data = audioManagerRef.getWavAsBase64()
+                        if (base64Data.length > 0) {
+                            audioStatus.text = "📄 Base64: " + base64Data.substring(0, 20) + "..."
+                            console.log("=== AUDIO BASE64 WAV OUTPUT ===")
+                            console.log("Data Length:", base64Data.length, "characters")
+                            console.log("Sample Rate: 44100 Hz, Channels: 1, Format: 16-bit PCM")
+                            console.log("Base64 WAV Data:")
+                            console.log(base64Data)
+                            console.log("=== END BASE64 WAV OUTPUT ===")
+                        }
+                    }
+                }
+
+                Button {
+                    text: "📋 Copy"
+                    width: 50
+                    height: 25
+                    enabled: audioManagerRef.hasRecordedData
+                    background: Rectangle {
+                        color: parent.enabled ? (parent.pressed ? "#9b59b6" : "#8e44ad") : "#7f8c8d"
+                        radius: 3
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "white"
+                        font.pixelSize: 8
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    onClicked: {
+                        var base64Data = audioManagerRef.getWavAsBase64()
+                        var rawBase64 = audioManagerRef.getAudioAsBase64()
+                        
+                        console.log("=== AUDIO BASE64 COPY OUTPUT ===")
+                        console.log("🎵 WAV FORMAT (with header):")
+                        console.log("Length:", base64Data.length, "characters")
+                        console.log("Data:", base64Data)
+                        console.log("")
+                        console.log("🎵 RAW PCM FORMAT (audio only):")
+                        console.log("Length:", rawBase64.length, "characters") 
+                        console.log("Data:", rawBase64)
+                        console.log("=== END BASE64 COPY OUTPUT ===")
+                        
+                        audioStatus.text = "📋 Base64 logged to console"
+                    }
+                }
+            }
+
+            Text {
+                id: audioStatus
+                text: audioManagerRef.isCapturing ? "🔴 Recording..." : 
+                      audioManagerRef.hasRecordedData ? "✅ Ready to play" : "⭕ No recording"
+                color: audioManagerRef.isCapturing ? "#e74c3c" : 
+                       audioManagerRef.hasRecordedData ? "#2ecc71" : "#f39c12"
+                font.pixelSize: 10
+                anchors.horizontalCenter: parent.horizontalCenter
+                wrapMode: Text.Wrap
+                width: parent.width - 20
+                horizontalAlignment: Text.AlignHCenter
+            }
+        }
+
+        // Audio status connections
+        Connections {
+            target: audioManagerRef
+            
+            function onErrorOccurred(message) {
+                audioStatus.text = "❌ Error: " + message
+                audioStatus.color = "#e74c3c"
+            }
+            
+            function onCaptureStarted() {
+                audioStatus.text = "🔴 Recording..."
+                audioStatus.color = "#e74c3c"
+            }
+            
+            function onCaptureStopped() {
+                audioStatus.text = "✅ Recording complete"
+                audioStatus.color = "#2ecc71"
+                
+                // Auto-log base64 when recording stops
+                if (audioManagerRef.hasRecordedData) {
+                    var base64Data = audioManagerRef.getWavAsBase64()
+                    var rawBase64 = audioManagerRef.getAudioAsBase64()
+                    
+                    console.log("=== AUTO BASE64 LOG - RECORDING STOPPED ===")
+                    console.log("🎵 Recording completed - Base64 data available")
+                    console.log("WAV Format Length:", base64Data.length, "characters")
+                    console.log("Raw PCM Length:", rawBase64.length, "characters")
+                    console.log("📄 WAV Base64 (with header):", base64Data)
+                    console.log("📄 Raw PCM Base64 (audio only):", rawBase64)
+                    console.log("=== END AUTO BASE64 LOG ===")
+                }
+            }
+            
+            function onAudioPlayed() {
+                audioStatus.text = "🔊 Playback finished"
+                audioStatus.color = "#3498db"
             }
         }
     }

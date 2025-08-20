@@ -2,7 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Window 2.12
-import Audio 1.0
+import AudioController 1.0
 import "pages"
 import "components"
 
@@ -22,7 +22,7 @@ Window {
     property string currentStatus: "Ready to chat with robot..."
 
     // Audio Manager
-    AudioManager {
+    AudioController {
         id: audioManager
 
         onErrorOccurred: function(message) {

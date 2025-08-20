@@ -22,6 +22,11 @@ public:
     Q_INVOKABLE bool playAudio();
     Q_INVOKABLE bool saveToFile(const QString &filename);
     Q_INVOKABLE bool loadFromFile(const QString &filename);
+    
+    // Base64 encoding/decoding functions
+    Q_INVOKABLE QString getAudioAsBase64() const;
+    Q_INVOKABLE bool loadFromBase64(const QString &base64Data);
+    Q_INVOKABLE QString getWavAsBase64() const;
 
     // SỬA: Thêm const và chỉ khai báo, implementation trong .cpp
     bool isCapturing() const;

@@ -1,8 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import QtQuick.Dialogs
-import Audio 1.0
+import QtQuick.Dialogs 1.3
+import AudioController 1.0
 
 ApplicationWindow {
     id: mainWindow
@@ -11,7 +11,7 @@ ApplicationWindow {
     height: 250
     visible: true
 
-    AudioManager {
+    AudioController {
         id: audioManager
 
         onErrorOccurred: function(message) {

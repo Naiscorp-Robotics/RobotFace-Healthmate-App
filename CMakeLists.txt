@@ -8,6 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find Qt packages (prioritize Qt5 since it's available)
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Multimedia WebSockets Network)
 
+# Find ALSA library
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(ALSA REQUIRED alsa)
+
 # Set Qt version for conditional compilation
 set(QT_VERSION_MAJOR 5)
 
@@ -29,10 +33,11 @@ set(SOURCES
     include/audiomanager.h
 )
 
-# Form files - chỉ thêm nếu file tồn tại
-add_files_if_exist(FORMS
-    mainwindow.ui
-)
+# Form files - only add if file exists
+set(FORMS "")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/mainwindow.ui")
+    list(APPEND FORMS mainwindow.ui)
+endif()
 
 # List QML files for reference
 set(QML_FILES
@@ -70,7 +75,7 @@ add_executable(${PROJECT_NAME}
     ${RESOURCES}
 )
 
-# Link Qt5 libraries
+# Link Qt5 libraries and ALSA
 target_link_libraries(${PROJECT_NAME} 
     Qt5::Core 
     Qt5::Gui 
@@ -80,7 +85,11 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::Multimedia
     Qt5::Network
     Qt5::WebSockets
+    ${ALSA_LIBRARIES}
 )
+
+# Include ALSA header directories
+target_include_directories(${PROJECT_NAME} PRIVATE ${ALSA_INCLUDE_DIRS})
 
 # Platform-specific settings
 if(WIN32)

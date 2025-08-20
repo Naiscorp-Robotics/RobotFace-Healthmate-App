@@ -3,7 +3,9 @@
 #include <QQmlContext>
 #include <QDir>
 #include <QDebug>
+#include <QtQml>
 #include "../include/websocketbridge.h"
+#include "../include/audiomanager.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,6 +13,9 @@ int main(int argc, char *argv[])
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     
     QGuiApplication app(argc, argv);
+    
+    // Register AudioManager for QML
+    qmlRegisterType<AudioManager>("AudioController", 1, 0, "AudioController");
     
     QQmlApplicationEngine engine;
     
