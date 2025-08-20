@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include <QDir>
 #include "websocketbridge.h"
+#include "tsssocketbridge.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,8 +17,14 @@ int main(int argc, char *argv[])
     // Create and register WebSocket bridge
     WebSocketBridge *websocketBridge = new WebSocketBridge(&engine);
     
+    // Create and register TSS Socket bridge
+    TSSSocketBridge *tssSocketBridge = new TSSSocketBridge(&engine);
+    
     // Expose WebSocket bridge to QML
     engine.rootContext()->setContextProperty("websocketBridge", websocketBridge);
+    
+    // Expose TSS Socket bridge to QML
+    engine.rootContext()->setContextProperty("tssSocketBridge", tssSocketBridge);
     
     // Load the main QML file
     const QUrl url(QStringLiteral("qrc:/Main.qml"));

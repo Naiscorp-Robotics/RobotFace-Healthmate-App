@@ -303,4 +303,125 @@ Item {
 
         request.send()
     }
+
+    // TSS Socket Status Indicator
+    Rectangle {
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: 10
+        width: 120
+        height: 30
+        color: tssSocketBridge.isConnected ? "#4CAF50" : "#f44336"
+        radius: 15
+        opacity: 0.8
+
+        Text {
+            anchors.centerIn: parent
+            text: tssSocketBridge.isConnected ? "TSS Connected" : "TSS Disconnected"
+            color: "white"
+            font.pixelSize: 10
+            font.bold: true
+        }
+    }
+
+    // TSS Data Received Indicator
+    Rectangle {
+        id: tssDataIndicator
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: 10
+        anchors.topMargin: 45
+        width: 120
+        height: 25
+        color: "#2196F3"
+        radius: 12
+        opacity: 0
+        visible: false
+
+        Text {
+            anchors.centerIn: parent
+            text: "📡 TSS Data Received"
+            color: "white"
+            font.pixelSize: 9
+            font.bold: true
+        }
+
+        // Navigation notification
+        Text {
+            anchors.top: parent.bottom
+            anchors.topMargin: 5
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "Navigating to Care Steps..."
+            color: "#ffffff"
+            font.pixelSize: 8
+            font.bold: true
+            style: Text.Outline
+            styleColor: "#000000"
+            opacity: tssDataIndicator.visible ? 1 : 0
+            Behavior on opacity {
+                NumberAnimation { duration: 200 }
+            }
+        }
+
+        // Animation for showing the indicator
+        SequentialAnimation on opacity {
+            id: showAnimation
+            running: false
+            NumberAnimation { to: 1.0; duration: 300 }
+            PauseAnimation { duration: 2000 }
+            NumberAnimation { to: 0.0; duration: 300 }
+            onFinished: {
+                tssDataIndicator.visible = false
+            }
+        }
+    }
+
+    // Connect to TSS Socket signals
+    Connections {
+        target: tssSocketBridge
+
+        function onStepDataChanged() {
+            console.log("RobotFaceScreen: Received TSS step data, navigating to CareStepsScreen")
+            console.log("Step Number:", tssSocketBridge.currentStepNumber)
+            console.log("Step Description:", tssSocketBridge.currentStepDescription)
+            
+            // Show the TSS data received indicator
+            tssDataIndicator.visible = true
+            showAnimation.start()
+            
+            // Navigate to CareStepsScreen after a short delay
+            navigateTimer.start()
+        }
+
+        function onLogMessage(message) {
+            console.log("RobotFaceScreen TSS Log:", message)
+        }
+
+        function onMessageReceived(message) {
+            console.log("RobotFaceScreen TSS Message:", message)
+        }
+    }
+
+    // Timer for delayed navigation
+    Timer {
+        id: navigateTimer
+        interval: 1500 // 1.5 seconds delay
+        repeat: false
+        onTriggered: {
+            if (root.stackView) {
+                console.log("RobotFaceScreen: Navigating to CareStepsScreen")
+                root.stackView.push(Qt.resolvedUrl("CareStepsScreen.qml"), {
+                    "stackView": root.stackView
+                })
+            }
+        }
+    }
+
+    // Auto-connect to TSS server when screen loads
+    Component.onCompleted: {
+        console.log("RobotFaceScreen: Component completed, connecting to TSS server")
+        if (tssSocketBridge && !tssSocketBridge.isConnected) {
+            tssSocketBridge.connectToServer()
+        }
+    }
 }

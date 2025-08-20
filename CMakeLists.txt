@@ -20,6 +20,8 @@ set(SOURCES
     main.cpp
     websocketbridge.cpp
     websocketbridge.h
+    tsssocketbridge.cpp
+    tsssocketbridge.h
 )
 
 set(RESOURCES

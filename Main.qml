@@ -87,4 +87,12 @@ Window {
         }
         z: 1000  // Ensure it's on top
     }
+    TSSSocketPanel {
+        anchors {
+            top: parent.top
+            right: parent.right - 100
+            margins: 20
+        }
+        z: 1000  // Ensure it's on top
+    }
 }
