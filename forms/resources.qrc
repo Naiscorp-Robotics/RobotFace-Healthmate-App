@@ -2,15 +2,6 @@
 <RCC version="1.0">
     <qresource prefix="/">
         <file>Main.qml</file>
-        <file>TestMain.qml</file>
-        <file>MainSimple.qml</file>
-        <file>MainIntermediate.qml</file>
-        <file>MainWebSocketOnly.qml</file>
-        <file>MainVideoOnly.qml</file>
-        <file>MainOptimizedVideo.qml</file>
-        <file>MainCombined.qml</file>
-        <file>MainSimplified.qml</file>
-        <file>MainMinimal.qml</file>
         <file>pages/RobotFaceScreen.qml</file>
         <file>pages/CareStepsScreen.qml</file>
         <file>pages/ImageScreen.qml</file>
@@ -23,8 +14,8 @@
         <file>components/OptimizedVideoPlayer.qml</file>
     </qresource>
     <qresource prefix="/assets">
-        <file alias="blinking_face.mp4">assets/blinking_face.mp4</file>
-        <file alias="j97.jpg">assets/j97.jpg</file>
-        <file alias="map.png">assets/map.png</file>
+        <file alias="blinking_face.mp4">../assets/blinking_face.mp4</file>
+        <file alias="j97.jpg">../assets/j97.jpg</file>
+        <file alias="map.png">../assets/map.png</file>
     </qresource>
 </RCC>

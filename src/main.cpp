@@ -3,7 +3,7 @@
 #include <QQmlContext>
 #include <QDir>
 #include <QDebug>
-#include "websocketbridge.h"
+#include "../include/websocketbridge.h"
 
 int main(int argc, char *argv[])
 {
@@ -28,63 +28,9 @@ int main(int argc, char *argv[])
         }
     });
 
-    // Determine which QML file to load (use fixed Main.qml by default)
+    // Use the Main.qml file
     QString qmlFile = "qrc:/Main.qml";
-    
-    // Check command line arguments for test modes
-    for (int i = 1; i < argc; ++i) {
-        QString arg = QString::fromUtf8(argv[i]);
-        if (arg == "--simple" || arg == "-s") {
-            qmlFile = "qrc:/MainSimple.qml";
-            qDebug() << "Using simplified QML version for testing";
-            break;
-        }
-        else if (arg == "--intermediate" || arg == "-i") {
-            qmlFile = "qrc:/MainIntermediate.qml";
-            qDebug() << "Using intermediate QML version with WebSocketPanel";
-            break;
-        }
-        else if (arg == "--test" || arg == "-t") {
-            qmlFile = "qrc:/TestMain.qml";
-            qDebug() << "Using test QML version";
-            break;
-        }
-        else if (arg == "--websocket" || arg == "-w") {
-            qmlFile = "qrc:/MainWebSocketOnly.qml";
-            qDebug() << "Using WebSocket-only QML version";
-            break;
-        }
-        else if (arg == "--video" || arg == "-v") {
-            qmlFile = "qrc:/MainVideoOnly.qml";
-            qDebug() << "Using Video-only QML version";
-            break;
-        }
-        else if (arg == "--optimized" || arg == "-o") {
-            qmlFile = "qrc:/MainOptimizedVideo.qml";
-            qDebug() << "Using Optimized Video QML version";
-            break;
-        }
-        else if (arg == "--combined" || arg == "-c") {
-            qmlFile = "qrc:/MainCombined.qml";
-            qDebug() << "Using Combined (WebSocket + Optimized Video) QML version";
-            break;
-        }
-        else if (arg == "--original" || arg == "-r") {
-            qmlFile = "qrc:/Main.qml";
-            qDebug() << "Using Original QML version (may crash)";
-            break;
-        }
-        else if (arg == "--minimal" || arg == "-m") {
-            qmlFile = "qrc:/MainMinimal.qml";
-            qDebug() << "Using Minimal QML version (video only)";
-            break;
-        }
-        else if (arg == "--simplified" || arg == "-f") {
-            qmlFile = "qrc:/MainSimplified.qml";
-            qDebug() << "Using Simplified QML version (video + websocket panel)";
-            break;
-        }
-    }
+    qDebug() << "Loading Main.qml interface";
     
     // Load the selected QML file with try-catch for any C++ exceptions
     const QUrl url(qmlFile);

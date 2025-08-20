@@ -1,4 +1,4 @@
-#include "websocketbridge.h"
+#include "../include/websocketbridge.h"
 #include <QDebug>
 #include <QUrl>
 

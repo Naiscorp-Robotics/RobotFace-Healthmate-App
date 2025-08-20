@@ -10,20 +10,22 @@ find_package(Qt5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Multimedi
 # Set Qt version for conditional compilation
 set(QT_VERSION_MAJOR 5)
 
-# Enable Qt automoc, autouic, and autorcc
+# Enable Qt automoc and autorcc for QML
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
+
+# Include directories
+include_directories(include)
 
 # Source files
 set(SOURCES
-    main.cpp
-    websocketbridge.cpp
-    websocketbridge.h
+    src/main.cpp
+    src/websocketbridge.cpp
+    include/websocketbridge.h
 )
 
 set(RESOURCES
-    resources.qrc
+    forms/resources.qrc
 )
 
 # Create executable
@@ -50,6 +52,6 @@ endif()
 
 # Copy assets to build directory
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY pages DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY components DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY Main.qml DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY forms/pages DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY forms/components DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY forms/Main.qml DESTINATION ${CMAKE_BINARY_DIR})
