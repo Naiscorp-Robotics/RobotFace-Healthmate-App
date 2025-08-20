@@ -30,33 +30,13 @@ Item {
         id: overlayContainer
         anchors.fill: parent
 
-        // Header với title
-        Rectangle {
-            id: header
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 60
-            color: "transparent"
-
-            Text {
-                anchors.centerIn: parent
-                text: "🤖 Robot Face Interface"
-                font.pixelSize: 20
-                font.bold: true
-                color: "#ffffff"
-                style: Text.Outline
-                styleColor: "#000000"
-            }
-        }
-
         // Bottom controls overlay
         Rectangle {
             id: bottomControls
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 260
+            height: 100
             color: "transparent"
 
             // Semi-transparent background cho controls
@@ -194,13 +174,6 @@ Item {
                     }
                 }
 
-                // Status
-                Text {
-                    text: root.currentStatus
-                    font.pixelSize: 12
-                    color: "#cccccc"
-                    Layout.alignment: Qt.AlignHCenter
-                }
             }
         }
     }
@@ -304,26 +277,6 @@ Item {
         request.send()
     }
 
-    // TSS Socket Status Indicator
-    Rectangle {
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.margins: 10
-        width: 120
-        height: 30
-        color: tssSocketBridge.isConnected ? "#4CAF50" : "#f44336"
-        radius: 15
-        opacity: 0.8
-
-        Text {
-            anchors.centerIn: parent
-            text: tssSocketBridge.isConnected ? "TSS Connected" : "TSS Disconnected"
-            color: "white"
-            font.pixelSize: 10
-            font.bold: true
-        }
-    }
-
     // TSS Data Received Indicator
     Rectangle {
         id: tssDataIndicator
@@ -399,6 +352,23 @@ Item {
 
         function onMessageReceived(message) {
             console.log("RobotFaceScreen TSS Message:", message)
+        }
+    }
+
+    // Connect to WebSocket signals
+    Connections {
+        target: websocketBridge
+
+        function onLogMessage(message) {
+            console.log("RobotFaceScreen WebSocket Log:", message)
+        }
+
+        function onMessageReceived(message) {
+            console.log("RobotFaceScreen WebSocket Message:", message)
+        }
+
+        function onConnectionStatusChanged() {
+            console.log("RobotFaceScreen WebSocket Status Changed:", websocketBridge.isConnected)
         }
     }
 

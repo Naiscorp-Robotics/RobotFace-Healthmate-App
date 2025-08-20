@@ -470,26 +470,6 @@ Item {
         }
     }
 
-    // TSS Socket Status Indicator
-    Rectangle {
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.margins: 10
-        width: 120
-        height: 30
-        color: tssSocketBridge.isConnected ? "#4CAF50" : "#f44336"
-        radius: 15
-        opacity: 0.8
-
-        Text {
-            anchors.centerIn: parent
-            text: tssSocketBridge.isConnected ? "TSS Connected" : "TSS Disconnected"
-            color: "white"
-            font.pixelSize: 10
-            font.bold: true
-        }
-    }
-
     // TSS Data Received Indicator
     Rectangle {
         id: tssDataIndicator

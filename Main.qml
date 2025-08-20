@@ -78,21 +78,20 @@ Window {
         }
     }
 
-    // WebSocket Panel (overlay)
-    WebSocketPanel {
-        anchors {
-            top: parent.top
-            right: parent.right
-            margins: 20
+    // Connect to WebSocket bridge signals
+    Connections {
+        target: websocketBridge
+
+        function onLogMessage(message) {
+            console.log("Main WebSocket Log:", message)
         }
-        z: 1000  // Ensure it's on top
-    }
-    TSSSocketPanel {
-        anchors {
-            top: parent.top
-            right: parent.right - 100
-            margins: 20
+
+        function onMessageReceived(message) {
+            console.log("Main WebSocket Message:", message)
         }
-        z: 1000  // Ensure it's on top
+
+        function onConnectionStatusChanged() {
+            console.log("Main WebSocket Status Changed:", websocketBridge.isConnected)
+        }
     }
 }

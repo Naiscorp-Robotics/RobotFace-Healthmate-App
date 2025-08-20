@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QDir>
+#include <QTimer>
 #include "websocketbridge.h"
 #include "tsssocketbridge.h"
 
@@ -16,6 +17,8 @@ int main(int argc, char *argv[])
     
     // Create and register WebSocket bridge
     WebSocketBridge *websocketBridge = new WebSocketBridge(&engine);
+    qDebug() << "WebSocketBridge created with autoConnect:" << websocketBridge->autoConnect();
+    qDebug() << "WebSocketBridge server URL:" << websocketBridge->serverUrl();
     
     // Create and register TSS Socket bridge
     TSSSocketBridge *tssSocketBridge = new TSSSocketBridge(&engine);
@@ -35,6 +38,15 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
     
     engine.load(url);
+    
+    // Auto-connect both bridges after the application is loaded
+    QTimer::singleShot(2000, [websocketBridge, tssSocketBridge]() {
+        // WebSocketBridge will auto-connect by itself
+        // TSSSocketBridge needs manual connection
+        if (!tssSocketBridge->isConnected()) {
+            tssSocketBridge->connectToServer();
+        }
+    });
     
     return app.exec();
 }

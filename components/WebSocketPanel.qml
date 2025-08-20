@@ -141,7 +141,7 @@ Rectangle {
 
     // Auto-connect on startup
     Component.onCompleted: {
-        // WebSocket will auto-connect TCP, but we can also connect WebSocket here if needed
-        // websocketBridge.connectToServer()
+        // WebSocketBridge now auto-connects automatically
+        // No manual connection needed
     }
 }
