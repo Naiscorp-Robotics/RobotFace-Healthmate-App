@@ -1,6 +1,6 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 
 Item {
     id: root
@@ -74,7 +74,7 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: 20
-        source: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/map.png"
+        source: "qrc:/assets/map.png"
         fillMode: Image.PreserveAspectFit
     }
 }

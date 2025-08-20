@@ -1,14 +1,15 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import QtQuick.Window
-import "./pages"
-import "./components"
-import Audio 1.0 // Import AudioManager
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
+import QtQuick.Window 2.12
+import Audio 1.0
+import "pages"
+import "components"
+
 
 Window {
-    width: Screen.width
-    height: Screen.height
+    width: 800
+    height: 600
     visible: true
     title: qsTr("Robot Face Interface")
     color: "#000000"
@@ -113,16 +114,34 @@ Window {
                 currentStatus = status
             }
         }
+        // RobotFaceScreen {
+        //     anchors.fill: parent
+        //     currentResponse: currentResponse
+        //     currentStatus: currentStatus
+        //     onResponseChanged: function(response) {
+        //         currentResponse = response
+        //     }
+        //     onStatusChanged: function(status) {
+        //         currentStatus = status
+        //     }
+        // }
     }
 
-    // WebSocket Panel (overlay)
-    WebSocketPanel {
-        anchors {
-            top: parent.top
-            right: parent.right
-            margins: 20
+    // Connect to WebSocket bridge signals
+    Connections {
+        target: websocketBridge
+
+        function onLogMessage(message) {
+            console.log("Main WebSocket Log:", message)
         }
-        z: 1000  // Ensure it's on top
+
+        function onMessageReceived(message) {
+            console.log("Main WebSocket Message:", message)
+        }
+
+        function onConnectionStatusChanged() {
+            console.log("Main WebSocket Status Changed:", websocketBridge.isConnected)
+        }
     }
 
     // Audio Control Panel (overlay)

@@ -1,8 +1,8 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import QtMultimedia
-import QtQuick.Window
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
+import QtMultimedia 5.12
+import QtQuick.Window 2.12
 
 import "../components"
 
@@ -19,14 +19,41 @@ Item {
     signal responseChanged(string response)
     signal statusChanged(string status)
 
-    // Video Player full màn hình
-    Video {
+    // Optimized Video Player with GStreamer backend
+    OptimizedVideoPlayer {
         id: robotVideo
         anchors.fill: parent
-        source: "file:///F:/Study-Work/Naiscorp/QT/RobotFace-Healthmate-App/assets/blinking_face.mp4"
+        source: "qrc:/assets/blinking_face.mp4"
         autoPlay: true
-        loops: MediaPlayer.Infinite
-        fillMode: VideoOutput.PreserveAspectFit
+        loops: -1 // infinite loops
+        
+        Component.onCompleted: {
+            console.log("Optimized video player loaded, source: " + source)
+            // Short delay before playing to ensure component is fully initialized
+            playTimer.start()
+        }
+        
+        onStarted: {
+            console.log("Video started")
+        }
+        
+        onStopped: {
+            console.log("Video stopped")
+        }
+        
+        onError: function(message) {
+            console.error("Video error: " + message)
+        }
+        
+        Timer {
+            id: playTimer
+            interval: 1000
+            repeat: false
+            onTriggered: {
+                console.log("Starting video playback after delay")
+                robotVideo.play()
+            }
+        }
     }
 
     // Overlay container cho tất cả controls
@@ -34,33 +61,13 @@ Item {
         id: overlayContainer
         anchors.fill: parent
 
-        // Header với title
-        Rectangle {
-            id: header
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 60
-            color: "transparent"
-
-            Text {
-                anchors.centerIn: parent
-                text: "🤖 Robot Face Interface"
-                font.pixelSize: 20
-                font.bold: true
-                color: "#ffffff"
-                style: Text.Outline
-                styleColor: "#000000"
-            }
-        }
-
         // Bottom controls overlay
         Rectangle {
             id: bottomControls
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 260
+            height: 100
             color: "transparent"
 
             // Semi-transparent background cho controls
@@ -198,13 +205,6 @@ Item {
                     }
                 }
 
-                // Status
-                Text {
-                    text: root.currentStatus
-                    font.pixelSize: 12
-                    color: "#cccccc"
-                    Layout.alignment: Qt.AlignHCenter
-                }
             }
         }
     }
@@ -216,7 +216,7 @@ Item {
         color: "#ffffff"
         font.pixelSize: 16
         horizontalAlignment: Text.AlignHCenter
-        visible: robotVideo.status === MediaPlayer.InvalidMedia
+        visible: false // We'll handle errors via the OptimizedVideoPlayer's error signal
     }
 
     // Debug info (ẩn khi video hoạt động)
@@ -224,11 +224,8 @@ Item {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.margins: 10
-        text: "Video Status: " + robotVideo.status +
-              "\nError: " + robotVideo.error +
-              "\nPlaying: " + (robotVideo.playbackState === MediaPlayer.PlayingState ? "Yes" : "No") +
-              "\nDuration: " + Math.round(robotVideo.duration/1000) + "s" +
-              "\nSource: " + robotVideo.source
+        text: "Video Source: " + robotVideo.source +
+              "\nPlaying: " + (robotVideo.playing ? "Yes" : "No")
         color: "#ffffff"
         font.pixelSize: 10
         visible: false // Ẩn debug text
@@ -306,5 +303,123 @@ Item {
         }
 
         request.send()
+    }
+
+    // TSS Data Received Indicator
+    Rectangle {
+        id: tssDataIndicator
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: 10
+        anchors.topMargin: 45
+        width: 120
+        height: 25
+        color: "#2196F3"
+        radius: 12
+        opacity: 0
+        visible: false
+
+        Text {
+            anchors.centerIn: parent
+            text: "📡 TSS Data Received"
+            color: "white"
+            font.pixelSize: 9
+            font.bold: true
+        }
+
+        // Navigation notification
+        Text {
+            anchors.top: parent.bottom
+            anchors.topMargin: 5
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "Navigating to Care Steps..."
+            color: "#ffffff"
+            font.pixelSize: 8
+            font.bold: true
+            style: Text.Outline
+            styleColor: "#000000"
+            opacity: tssDataIndicator.visible ? 1 : 0
+            Behavior on opacity {
+                NumberAnimation { duration: 200 }
+            }
+        }
+
+        // Animation for showing the indicator
+        SequentialAnimation on opacity {
+            id: showAnimation
+            running: false
+            NumberAnimation { to: 1.0; duration: 300 }
+            PauseAnimation { duration: 2000 }
+            NumberAnimation { to: 0.0; duration: 300 }
+            onFinished: {
+                tssDataIndicator.visible = false
+            }
+        }
+    }
+
+    // Connect to TSS Socket signals
+    Connections {
+        target: tssSocketBridge
+
+        function onStepDataChanged() {
+            console.log("RobotFaceScreen: Received TSS step data, navigating to CareStepsScreen")
+            console.log("Step Number:", tssSocketBridge.currentStepNumber)
+            console.log("Step Description:", tssSocketBridge.currentStepDescription)
+            
+            // Show the TSS data received indicator
+            tssDataIndicator.visible = true
+            showAnimation.start()
+            
+            // Navigate to CareStepsScreen after a short delay
+            navigateTimer.start()
+        }
+
+        function onLogMessage(message) {
+            console.log("RobotFaceScreen TSS Log:", message)
+        }
+
+        function onMessageReceived(message) {
+            console.log("RobotFaceScreen TSS Message:", message)
+        }
+    }
+
+    // Connect to WebSocket signals
+    Connections {
+        target: websocketBridge
+
+        function onLogMessage(message) {
+            console.log("RobotFaceScreen WebSocket Log:", message)
+        }
+
+        function onMessageReceived(message) {
+            console.log("RobotFaceScreen WebSocket Message:", message)
+        }
+
+        function onConnectionStatusChanged() {
+            console.log("RobotFaceScreen WebSocket Status Changed:", websocketBridge.isConnected)
+        }
+    }
+
+    // Timer for delayed navigation
+    Timer {
+        id: navigateTimer
+        interval: 1500 // 1.5 seconds delay
+        repeat: false
+        onTriggered: {
+            if (root.stackView) {
+                console.log("RobotFaceScreen: Navigating to CareStepsScreen")
+                root.stackView.push(Qt.resolvedUrl("CareStepsScreen.qml"), {
+                    "stackView": root.stackView
+                })
+            }
+        }
+    }
+
+    // Auto-connect to TSS server when screen loads
+    Component.onCompleted: {
+        console.log("RobotFaceScreen: Component completed, connecting to TSS server")
+        if (tssSocketBridge && !tssSocketBridge.isConnected) {
+            tssSocketBridge.connectToServer()
+        }
     }
 }
