@@ -1,63 +1,126 @@
-#include "mainwindow.h"
-#include <iostream>
-#include <QApplication>
-#include <QTimer>
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
-#include <memory>
-#include <chrono>
-#include <thread>
-
-// Callback function to handle received messages
-void messageCallback(const std_msgs::msg::String::SharedPtr msg)
-{
-    std::cout << "Received message: " << msg->data << std::endl;
-}
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QDir>
+#include <QDebug>
+#include "websocketbridge.h"
 
 int main(int argc, char *argv[])
 {
-    // Initialize ROS2
-    rclcpp::init(argc, argv);
+    // Enable high DPI support (must be set before creating QApplication)
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     
-    std::cout << "ROS2 node initialized!" << std::endl;
+    QGuiApplication app(argc, argv);
     
-    // Create a ROS2 node
-    auto node = std::make_shared<rclcpp::Node>("robot_app_node");
+    QQmlApplicationEngine engine;
     
-    // Create a subscription to a sample topic
-    auto subscription = node->create_subscription<std_msgs::msg::String>(
-        "sample_topic",                // Topic name
-        10,                            // QoS profile (queue size)
-        &messageCallback               // Callback function
-    );
+    // Create WebSocket bridge with proper parent
+    WebSocketBridge *websocketBridge = new WebSocketBridge(&app);
     
-    std::cout << "Subscribed to 'sample_topic'. Waiting for messages..." << std::endl;
+    // Expose WebSocket bridge to QML
+    engine.rootContext()->setContextProperty("websocketBridge", websocketBridge);
     
-    // Create Qt application
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    
-    // Create a QTimer to process ROS2 callbacks
-    QTimer rosTimer;
-    rosTimer.setInterval(100); // Process ROS2 messages every 100ms
-    
-    // Connect the timer to a lambda function that processes ROS2 callbacks
-    QObject::connect(&rosTimer, &QTimer::timeout, [&node]() {
-        if (rclcpp::ok()) {
-            rclcpp::spin_some(node);
-            std::cout << "Processing ROS2 messages..." << std::endl;
+    // Set up error handling for QML warnings and errors
+    QObject::connect(&engine, &QQmlApplicationEngine::warnings,
+                    [](const QList<QQmlError> &warnings) {
+        for (const QQmlError &error : warnings) {
+            qWarning() << "QML Warning:" << error.toString();
         }
     });
+
+    // Determine which QML file to load (use fixed Main.qml by default)
+    QString qmlFile = "qrc:/Main.qml";
     
-    // Start the timer
-    rosTimer.start();
+    // Check command line arguments for test modes
+    for (int i = 1; i < argc; ++i) {
+        QString arg = QString::fromUtf8(argv[i]);
+        if (arg == "--simple" || arg == "-s") {
+            qmlFile = "qrc:/MainSimple.qml";
+            qDebug() << "Using simplified QML version for testing";
+            break;
+        }
+        else if (arg == "--intermediate" || arg == "-i") {
+            qmlFile = "qrc:/MainIntermediate.qml";
+            qDebug() << "Using intermediate QML version with WebSocketPanel";
+            break;
+        }
+        else if (arg == "--test" || arg == "-t") {
+            qmlFile = "qrc:/TestMain.qml";
+            qDebug() << "Using test QML version";
+            break;
+        }
+        else if (arg == "--websocket" || arg == "-w") {
+            qmlFile = "qrc:/MainWebSocketOnly.qml";
+            qDebug() << "Using WebSocket-only QML version";
+            break;
+        }
+        else if (arg == "--video" || arg == "-v") {
+            qmlFile = "qrc:/MainVideoOnly.qml";
+            qDebug() << "Using Video-only QML version";
+            break;
+        }
+        else if (arg == "--optimized" || arg == "-o") {
+            qmlFile = "qrc:/MainOptimizedVideo.qml";
+            qDebug() << "Using Optimized Video QML version";
+            break;
+        }
+        else if (arg == "--combined" || arg == "-c") {
+            qmlFile = "qrc:/MainCombined.qml";
+            qDebug() << "Using Combined (WebSocket + Optimized Video) QML version";
+            break;
+        }
+        else if (arg == "--original" || arg == "-r") {
+            qmlFile = "qrc:/Main.qml";
+            qDebug() << "Using Original QML version (may crash)";
+            break;
+        }
+        else if (arg == "--minimal" || arg == "-m") {
+            qmlFile = "qrc:/MainMinimal.qml";
+            qDebug() << "Using Minimal QML version (video only)";
+            break;
+        }
+        else if (arg == "--simplified" || arg == "-f") {
+            qmlFile = "qrc:/MainSimplified.qml";
+            qDebug() << "Using Simplified QML version (video + websocket panel)";
+            break;
+        }
+    }
     
-    // Run the Qt event loop
-    int result = a.exec();
+    // Load the selected QML file with try-catch for any C++ exceptions
+    const QUrl url(qmlFile);
     
-    // Clean up ROS2 resources when application exits
-    rclcpp::shutdown();
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [url](QObject *obj, const QUrl &objUrl) {
+        if (!obj && url == objUrl) {
+            qDebug() << "Failed to load QML file:" << url;
+            QCoreApplication::exit(-1);
+        } else {
+            qDebug() << "QML loaded successfully";
+        }
+    }, Qt::QueuedConnection);
     
-    return result;
+    try {
+        qDebug() << "About to load QML file:" << url.toString();
+        engine.load(url);
+        qDebug() << "QML file loaded, checking for errors...";
+        
+        // Check if any root objects were created
+        if (engine.rootObjects().isEmpty()) {
+            qCritical() << "No root objects created - QML loading failed!";
+            return -1;
+        }
+        
+        qDebug() << "QML engine initialized successfully with" 
+                 << engine.rootObjects().size() << "root objects";
+    } 
+    catch (const std::exception& e) {
+        qCritical() << "Exception during QML loading:" << e.what();
+        return -1;
+    }
+    catch (...) {
+        qCritical() << "Unknown exception during QML loading";
+        return -1;
+    }
+    
+    return app.exec();
 }
