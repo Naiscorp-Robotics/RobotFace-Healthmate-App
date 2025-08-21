@@ -132,15 +132,15 @@ Window {
         target: websocketBridge
 
         function onLogMessage(message) {
-            console.log("Main WebSocket Log:", message)
+            //console.log("Main WebSocket Log:", message)
         }
 
         function onMessageReceived(message) {
-            console.log("Main WebSocket Message:", message)
+            //console.log("Main WebSocket Message:", message)
         }
 
         function onConnectionStatusChanged() {
-            console.log("Main WebSocket Status Changed:", websocketBridge.isConnected)
+            //console.log("Main WebSocket Status Changed:", websocketBridge.isConnected)
         }
     }
 

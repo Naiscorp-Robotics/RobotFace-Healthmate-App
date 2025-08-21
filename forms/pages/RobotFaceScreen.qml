@@ -13,6 +13,7 @@ Item {
     property string currentStatus: "Ready to chat with robot..."
     property StackView stackView
     property alias audioManager: audioManagerRef
+    property var globalAllSteps: []
 
     AudioController {
         id: audioManagerRef
@@ -395,7 +396,7 @@ Item {
         target: tssSocketBridge
 
         function onStepDataChanged() {
-            console.log("RobotFaceScreen: Received TSS step data, navigating to CareStepsScreen")
+            console.log("RobotFaceScreen: Received TSS step data")
             console.log("Step Number:", tssSocketBridge.currentStepNumber)
             console.log("Step Description:", tssSocketBridge.currentStepDescription)
             
@@ -403,8 +404,46 @@ Item {
             tssDataIndicator.visible = true
             showAnimation.start()
             
-            // Navigate to CareStepsScreen after a short delay
-            navigateTimer.start()
+            // Store step data globally
+            let stepData = {
+                stepNumber: tssSocketBridge.currentStepNumber,
+                stepDescription: tssSocketBridge.currentStepDescription,
+                imageBase64: tssSocketBridge.currentImageBase64,
+                timestamp: Date.now()
+            }
+            
+            // Add to global steps array
+            if (!root.globalAllSteps) {
+                root.globalAllSteps = []
+            }
+            
+            // Check if step already exists
+            let existingIndex = -1
+            for (let i = 0; i < root.globalAllSteps.length; i++) {
+                if (root.globalAllSteps[i].stepNumber === tssSocketBridge.currentStepNumber) {
+                    existingIndex = i
+                    break
+                }
+            }
+            
+            if (existingIndex >= 0) {
+                root.globalAllSteps[existingIndex] = stepData
+                console.log("RobotFaceScreen: Updated existing step", tssSocketBridge.currentStepNumber, "in global steps")
+            } else {
+                root.globalAllSteps.push(stepData)
+                console.log("RobotFaceScreen: Added new step", tssSocketBridge.currentStepNumber, "to global steps")
+            }
+            
+            console.log("RobotFaceScreen: Total steps in global:", root.globalAllSteps.length)
+            console.log("RobotFaceScreen: Global step numbers:", JSON.stringify(root.globalAllSteps.map(s => s.stepNumber)))
+            
+            // Navigate only when step number is 1
+            if (tssSocketBridge.currentStepNumber === 1) {
+                console.log("RobotFaceScreen: Step 1 received, navigating to CareStepsScreen")
+                navigateTimer.start()
+            } else {
+                console.log("RobotFaceScreen: Step", tssSocketBridge.currentStepNumber, "received, not navigating")
+            }
         }
 
         function onLogMessage(message) {
@@ -421,15 +460,15 @@ Item {
         target: websocketBridge
 
         function onLogMessage(message) {
-            console.log("RobotFaceScreen WebSocket Log:", message)
+            // console.log("RobotFaceScreen WebSocket Log:", message)
         }
 
         function onMessageReceived(message) {
-            console.log("RobotFaceScreen WebSocket Message:", message)
+            // console.log("RobotFaceScreen WebSocket Message:", message)
         }
 
         function onConnectionStatusChanged() {
-            console.log("RobotFaceScreen WebSocket Status Changed:", websocketBridge.isConnected)
+            // console.log("RobotFaceScreen WebSocket Status Changed:", websocketBridge.isConnected)
         }
     }
 

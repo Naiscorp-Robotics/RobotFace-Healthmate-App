@@ -21,7 +21,9 @@ public:
     explicit TSSSocketBridge(QObject *parent = nullptr);
     ~TSSSocketBridge();
 
-    Q_INVOKABLE void connectToServer(const QString &url = "ws://localhost:12346");
+    Q_INVOKABLE void connectToServer(const QString &url = "ws://192.168.1.122:8765"); //hoang
+    // Q_INVOKABLE void connectToServer(const QString &url = "ws://192.168.1.7:12346");
+
     Q_INVOKABLE void disconnectFromServer();
     Q_INVOKABLE void sendMessage(const QString &message);
     Q_INVOKABLE void sendStepRequest(int stepNumber, const QString &stepDescription = "");

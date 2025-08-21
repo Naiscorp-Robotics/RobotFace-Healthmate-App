@@ -17,10 +17,10 @@ WebSocketBridge::WebSocketBridge(QObject *parent)
     
     // Auto-connect after a short delay to ensure the application is fully initialized
     if (m_autoConnect) {
-        qDebug() << "WebSocketBridge: Auto-connect enabled, will connect in 1 second";
+        // qDebug() << "WebSocketBridge: Auto-connect enabled, will connect in 1 second";
         QTimer::singleShot(1000, this, &WebSocketBridge::autoConnectToServer);
     } else {
-        qDebug() << "WebSocketBridge: Auto-connect disabled";
+        // qDebug() << "WebSocketBridge: Auto-connect disabled";
     }
 }
 
@@ -64,16 +64,16 @@ void WebSocketBridge::sendMessage(const QString &message)
 
 void WebSocketBridge::autoConnectToServer()
 {
-    qDebug() << "WebSocketBridge::autoConnectToServer called";
-    qDebug() << "Auto-connect enabled:" << m_autoConnect;
-    qDebug() << "Currently connected:" << isConnected();
+    // qDebug() << "WebSocketBridge::autoConnectToServer called";
+    // qDebug() << "Auto-connect enabled:" << m_autoConnect;
+    // qDebug() << "Currently connected:" << isConnected();
     
     if (m_autoConnect && !isConnected()) {
         emit logMessage("🔄 Auto-connecting to WebSocket server...");
         emit logMessage("Target server: " + m_serverUrl);
         connectToServer();
     } else {
-        qDebug() << "Auto-connect skipped - autoConnect:" << m_autoConnect << "isConnected:" << isConnected();
+        // qDebug() << "Auto-connect skipped - autoConnect:" << m_autoConnect << "isConnected:" << isConnected();
     }
 }
 
@@ -109,7 +109,7 @@ void WebSocketBridge::onWebSocketDisconnected()
     emit logMessage("❌ WebSocket disconnected");
     emit logMessage("Disconnect reason: " + m_webSocket.closeReason());
     emit connectionStatusChanged();
-    qDebug() << "WebSocket disconnected, reason:" << m_webSocket.closeReason();
+    // qDebug() << "WebSocket disconnected, reason:" << m_webSocket.closeReason();
     
     // Auto-reconnect if autoConnect is enabled
     if (m_autoConnect) {
@@ -131,7 +131,7 @@ void WebSocketBridge::onWebSocketError(QAbstractSocket::SocketError error)
     QString errorMsg = "WebSocket error: " + m_webSocket.errorString();
     emit logMessage(errorMsg);
     emit logMessage("Error code: " + QString::number(error));
-    qDebug() << errorMsg;
+    // qDebug() << errorMsg;
 }
 
 

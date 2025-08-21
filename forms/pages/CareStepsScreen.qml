@@ -8,41 +8,28 @@ Item {
     property int currentStepIndex: 0
     
     // Dynamic care steps that can be updated from TSS Socket
-    property var careSteps: [
-        {
-            title: "Bước 1: Kiểm tra sức khỏe tổng quát",
-            description: "Bắt đầu bằng việc kiểm tra các chỉ số cơ bản như huyết áp, nhịp tim, nhiệt độ cơ thể. Đảm bảo bạn đang trong trạng thái ổn định trước khi thực hiện các bước tiếp theo.",
-            image: "qrc:/assets/j97.jpg"
-        },
-        {
-            title: "Bước 2: Thực hiện bài tập thở",
-            description: "Hít thở sâu và đều đặn trong 5-10 phút. Điều này giúp giảm căng thẳng, cải thiện tuần hoàn máu và tăng cường oxy cho não bộ.",
-            image: "qrc:/assets/j97.jpg"
-        },
-        {
-            title: "Bước 3: Uống nước đầy đủ",
-            description: "Uống ít nhất 8 ly nước mỗi ngày. Nước giúp thanh lọc cơ thể, duy trì nhiệt độ cơ thể và hỗ trợ các chức năng trao đổi chất.",
-            image: "qrc:/assets/j97.jpg"
-        },
-        {
-            title: "Bước 4: Thực hiện bài tập thể dục nhẹ",
-            description: "Thực hiện các động tác kéo giãn cơ bản trong 15-20 phút. Điều này giúp tăng cường sự linh hoạt và giảm đau nhức cơ bắp.",
-            image: "qrc:/assets/j97.jpg"
-        },
-        {
-            title: "Bước 5: Nghỉ ngơi và thư giãn",
-            description: "Dành thời gian nghỉ ngơi, có thể nghe nhạc nhẹ nhàng hoặc thiền định. Điều này giúp tâm trí được thư giãn và chuẩn bị cho giấc ngủ ngon.",
-            image: "qrc:/assets/j97.jpg"
-        }
-    ]
+    property var careSteps: []
 
     // Queue to store received TSS data
     property var tssDataQueue: []
     property bool hasQueuedData: false
+    
+    // Buffer to collect steps within 3 seconds
+    property var stepBuffer: []
+    property var stepBufferTimer: null
+    
+    // Flag to track if we've received step 1
+    property bool hasReceivedStep1: false
+    
+    // Array to store all received steps from TSS
+    property var allReceivedSteps: []
+    
+    // Global variable to store all steps across instances
+    property var globalAllSteps: []
 
-    // Function to add TSS data to queue
-    function addToTSSQueue(stepNumber, stepDescription, imageBase64) {
-        console.log("CareStepsScreen: Adding to TSS queue - Step", stepNumber, ":", stepDescription)
+    // Function to add step to buffer and start timer
+    function addStepToBuffer(stepNumber, stepDescription, imageBase64) {
+        console.log("CareStepsScreen: Adding step to buffer - Step", stepNumber, ":", stepDescription.substring(0, 50) + "...")
         
         let stepData = {
             stepNumber: stepNumber,
@@ -51,11 +38,82 @@ Item {
             timestamp: Date.now()
         }
         
-        tssDataQueue.push(stepData)
-        hasQueuedData = tssDataQueue.length > 0
+        // If this is step 1, clear the buffer first
+        if (stepNumber === 1) {
+            console.log("CareStepsScreen: Step 1 received, clearing buffer")
+            stepBuffer = []
+            hasReceivedStep1 = true
+        }
         
-        console.log("CareStepsScreen: Queue now has", tssDataQueue.length, "items")
-        console.log("CareStepsScreen: Queue contents:", JSON.stringify(tssDataQueue))
+        // Add to buffer
+        stepBuffer.push(stepData)
+        console.log("CareStepsScreen: Buffer now has", stepBuffer.length, "items")
+        console.log("CareStepsScreen: Buffer step numbers:", JSON.stringify(stepBuffer.map(s => s.stepNumber)))
+        
+        // Start or restart timer
+        if (stepBufferTimer) {
+            stepBufferTimer.stop()
+        }
+        
+        stepBufferTimer = Qt.createQmlObject('import QtQuick 2.15; Timer { interval: 3000; repeat: false; }', root)
+        stepBufferTimer.triggered.connect(function() {
+            processStepBuffer()
+        })
+        stepBufferTimer.start()
+        
+        console.log("CareStepsScreen: Started 3-second timer for step buffer")
+    }
+    
+    // Function to process all steps in buffer
+    function processStepBuffer() {
+        console.log("CareStepsScreen: Processing step buffer with", stepBuffer.length, "items")
+        
+        if (stepBuffer.length === 0) {
+            console.log("CareStepsScreen: Buffer is empty, nothing to process")
+            return
+        }
+        
+        // Sort steps by step number
+        stepBuffer.sort(function(a, b) {
+            return a.stepNumber - b.stepNumber
+        })
+        
+        console.log("CareStepsScreen: Sorted step numbers:", JSON.stringify(stepBuffer.map(s => s.stepNumber)))
+        
+        // Apply all steps from buffer
+        for (let i = 0; i < stepBuffer.length; i++) {
+            let stepData = stepBuffer[i]
+            console.log("CareStepsScreen: Processing step", stepData.stepNumber, "from buffer")
+            addOrUpdateStep(stepData.stepNumber, stepData.stepDescription, stepData.imageBase64)
+        }
+        
+        // Clear buffer
+        stepBuffer = []
+        console.log("CareStepsScreen: Buffer cleared after processing")
+        
+        // Always set current step to step 1 when processing buffer
+        if (careSteps.length > 0) {
+            // Find step 1 index
+            let step1Index = -1
+            for (let i = 0; i < careSteps.length; i++) {
+                if (careSteps[i].stepNumber === 1) {
+                    step1Index = i
+                    break
+                }
+            }
+            
+            if (step1Index >= 0) {
+                currentStepIndex = step1Index
+                console.log("CareStepsScreen: Set current step to step 1 (index", step1Index, ")")
+            } else {
+                // If no step 1, set to first step
+                currentStepIndex = 0
+                console.log("CareStepsScreen: No step 1 found, set current step to first step (index 0)")
+            }
+        }
+        
+        // Debug final state
+        debugAllSteps()
     }
 
     // Function to apply next queued step data
@@ -64,28 +122,8 @@ Item {
             let stepData = tssDataQueue.shift() // Remove and get first item
             console.log("CareStepsScreen: Applying queued step data:", stepData)
             
-            // Convert step number to 0-based index
-            let stepIndex = stepData.stepNumber - 1
-            
-            // Ensure the step exists in the array
-            if (stepIndex >= 0 && stepIndex < careSteps.length) {
-                // Update the step data
-                careSteps[stepIndex].title = "Bước " + stepData.stepNumber + ": " + stepData.stepDescription
-                careSteps[stepIndex].description = stepData.stepDescription
-                
-                // If we have base64 image data, convert it to a data URL
-                if (stepData.imageBase64 && stepData.imageBase64.length > 0) {
-                    careSteps[stepIndex].image = "data:image/png;base64," + stepData.imageBase64
-                    console.log("CareStepsScreen: Updated image for step", stepData.stepNumber)
-                }
-                
-                // Force UI update by triggering property change
-                careSteps = careSteps
-                
-                console.log("CareStepsScreen: Applied queued step", stepData.stepNumber, "successfully")
-            } else {
-                console.log("CareStepsScreen: Queued step index out of range:", stepIndex)
-            }
+            // Add or update step in the dynamic list
+            addOrUpdateStep(stepData.stepNumber, stepData.stepDescription, stepData.imageBase64)
             
             // Update queue status
             hasQueuedData = tssDataQueue.length > 0
@@ -95,13 +133,69 @@ Item {
         }
     }
 
+    // Function to add or update a step in the dynamic list
+    function addOrUpdateStep(stepNumber, stepDescription, imageBase64) {
+        console.log("CareStepsScreen: Adding/updating step", stepNumber, "with description:", stepDescription.substring(0, 50) + "...")
+        
+        // Find if step already exists
+        let existingIndex = -1
+        for (let i = 0; i < careSteps.length; i++) {
+            if (careSteps[i].stepNumber === stepNumber) {
+                existingIndex = i
+                break
+            }
+        }
+        
+        let stepData = {
+            stepNumber: stepNumber,
+            title: "Bước " + stepNumber + ": " + stepDescription,
+            description: stepDescription,
+            image: imageBase64 && imageBase64.length > 0 ? "data:image/png;base64," + imageBase64 : "qrc:/assets/j97.jpg"
+        }
+        
+        if (existingIndex >= 0) {
+            // Update existing step
+            careSteps[existingIndex] = stepData
+            console.log("CareStepsScreen: Updated existing step", stepNumber, "at index", existingIndex)
+        } else {
+            // Add new step
+            careSteps.push(stepData)
+            console.log("CareStepsScreen: Added new step", stepNumber, "at index", careSteps.length - 1)
+        }
+        
+        // Sort steps by step number
+        careSteps.sort(function(a, b) {
+            return a.stepNumber - b.stepNumber
+        })
+        
+        // Force UI update by creating a new array
+        let newCareSteps = []
+        for (let i = 0; i < careSteps.length; i++) {
+            newCareSteps.push(careSteps[i])
+        }
+        careSteps = newCareSteps
+        
+        // Only navigate to the step if this is the first step added
+        if (careSteps.length === 1) {
+            currentStepIndex = 0
+        }
+        
+        console.log("CareStepsScreen: Total steps now:", careSteps.length)
+        console.log("CareStepsScreen: Current step index:", currentStepIndex)
+        console.log("CareStepsScreen: All step numbers:", JSON.stringify(careSteps.map(s => s.stepNumber)))
+        console.log("CareStepsScreen: All step titles:", JSON.stringify(careSteps.map(s => s.title.substring(0, 30) + "...")))
+    }
+
     // Function to navigate to a specific step
     function navigateToStep(stepNumber) {
-        let stepIndex = stepNumber - 1
-        if (stepIndex >= 0 && stepIndex < careSteps.length) {
-            currentStepIndex = stepIndex
-            console.log("CareStepsScreen: Navigated to step", stepNumber)
+        for (let i = 0; i < careSteps.length; i++) {
+            if (careSteps[i].stepNumber === stepNumber) {
+                currentStepIndex = i
+                console.log("CareStepsScreen: Navigated to step", stepNumber)
+                return
+            }
         }
+        console.log("CareStepsScreen: Step", stepNumber, "not found")
     }
 
     // Function to clear the queue
@@ -114,28 +208,83 @@ Item {
     // Function to directly apply TSS data to a specific step
     function applyTSSDataDirectly(stepNumber, stepDescription, imageBase64) {
         console.log("CareStepsScreen: Applying TSS data directly to step", stepNumber)
+        addOrUpdateStep(stepNumber, stepDescription, imageBase64)
+    }
+
+    // Function to debug and show all current steps
+    function debugAllSteps() {
+        console.log("=== DEBUG ALL STEPS ===")
+        console.log("Total steps:", careSteps.length)
+        console.log("Current step index:", currentStepIndex)
+        for (let i = 0; i < careSteps.length; i++) {
+            console.log("Step", i, ":", careSteps[i].stepNumber, "-", careSteps[i].title.substring(0, 50) + "...")
+        }
+        console.log("=======================")
+    }
+    
+    // Function to process all received steps
+    function processAllReceivedSteps() {
+        console.log("CareStepsScreen: Processing all received steps:", allReceivedSteps.length)
         
-        // Convert step number to 0-based index
-        let stepIndex = stepNumber - 1
+        if (allReceivedSteps.length === 0) {
+            console.log("CareStepsScreen: No received steps to process")
+            return
+        }
         
-        // Ensure the step exists in the array
-        if (stepIndex >= 0 && stepIndex < careSteps.length) {
-            // Update the step data
-            careSteps[stepIndex].title = "Bước " + stepNumber + ": " + stepDescription
-            careSteps[stepIndex].description = stepDescription
-            
-            // If we have base64 image data, convert it to a data URL
-            if (imageBase64 && imageBase64.length > 0) {
-                careSteps[stepIndex].image = "data:image/png;base64," + imageBase64
-                console.log("CareStepsScreen: Updated image for step", stepNumber)
+        // Sort steps by step number
+        allReceivedSteps.sort(function(a, b) {
+            return a.stepNumber - b.stepNumber
+        })
+        
+        console.log("CareStepsScreen: Sorted allReceivedSteps step numbers:", JSON.stringify(allReceivedSteps.map(s => s.stepNumber)))
+        
+        // Apply all steps from allReceivedSteps
+        for (let i = 0; i < allReceivedSteps.length; i++) {
+            let stepData = allReceivedSteps[i]
+            console.log("CareStepsScreen: Processing step", stepData.stepNumber, "from allReceivedSteps")
+            addOrUpdateStep(stepData.stepNumber, stepData.stepDescription, stepData.imageBase64)
+        }
+        
+        // Set current step to step 1
+        if (careSteps.length > 0) {
+            // Find step 1 index
+            let step1Index = -1
+            for (let i = 0; i < careSteps.length; i++) {
+                if (careSteps[i].stepNumber === 1) {
+                    step1Index = i
+                    break
+                }
             }
             
-            // Force UI update by triggering property change
-            careSteps = careSteps
+            if (step1Index >= 0) {
+                currentStepIndex = step1Index
+                console.log("CareStepsScreen: Set current step to step 1 (index", step1Index, ")")
+            } else {
+                // If no step 1, set to first step
+                currentStepIndex = 0
+                console.log("CareStepsScreen: No step 1 found, set current step to first step (index 0)")
+            }
+        }
+        
+        // Debug final state
+        debugAllSteps()
+    }
+    
+    // Function to check for missing steps and request them
+    function checkForMissingSteps() {
+        console.log("CareStepsScreen: Checking for missing steps...")
+        
+        // If we have current step number, check if we're missing earlier steps
+        if (tssSocketBridge && tssSocketBridge.currentStepNumber > 1) {
+            console.log("CareStepsScreen: Current step is", tssSocketBridge.currentStepNumber, ", checking for missing steps 1 to", tssSocketBridge.currentStepNumber - 1)
             
-            console.log("CareStepsScreen: Applied TSS data directly to step", stepNumber, "successfully")
-        } else {
-            console.log("CareStepsScreen: Step index out of range:", stepIndex)
+            // Request missing steps from server
+            for (let i = 1; i < tssSocketBridge.currentStepNumber; i++) {
+                console.log("CareStepsScreen: Requesting step", i, "from server")
+                // You might need to implement a method to request specific steps
+                // For now, we'll add a placeholder step
+                addStepToBuffer(i, "Step " + i + " (placeholder - waiting for server data)", "")
+            }
         }
     }
 
@@ -166,7 +315,7 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: 20
             anchors.verticalCenter: parent.verticalCenter
-            text: "Bước " + (currentStepIndex + 1) + "/" + careSteps.length
+            text: careSteps.length > 0 ? "Bước " + (currentStepIndex + 1) + "/" + careSteps.length : "Chưa có bước nào"
             font.pixelSize: 14
             color: "#ecf0f1"
         }
@@ -181,31 +330,99 @@ Item {
         anchors.margins: 20
         spacing: 20
 
-        // Left side - Image (2/3 width)
+        // Left side - Steps List (1/3 width)
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: parent.width * 0.6
+            Layout.preferredWidth: parent.width * 0.3
             color: "#ffffff"
             radius: 10
             border.color: "#bdc3c7"
             border.width: 1
 
-            Image {
+            ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 10
-                source: careSteps[currentStepIndex].image
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                antialiasing: true
+                spacing: 5
+
+                // Steps List Header
+                Text {
+                    text: "📝 Danh sách các bước"
+                    font.pixelSize: 16
+                    font.bold: true
+                    color: "#2c3e50"
+                    Layout.fillWidth: true
+                }
+
+                // Steps List
+                ScrollView {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+
+                    ListView {
+                        id: stepsListView
+                        model: careSteps
+                        spacing: 5
+
+                        delegate: Rectangle {
+                            width: stepsListView.width
+                            height: 60
+                            color: index === currentStepIndex ? "#3498db" : "#ecf0f1"
+                            radius: 8
+                            border.color: "#bdc3c7"
+                            border.width: 1
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 10
+                                spacing: 10
+
+                                // Step number
+                                Rectangle {
+                                    width: 30
+                                    height: 30
+                                    radius: 15
+                                    color: index === currentStepIndex ? "#ffffff" : "#3498db"
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: modelData.stepNumber
+                                        font.pixelSize: 12
+                                        font.bold: true
+                                        color: index === currentStepIndex ? "#3498db" : "#ffffff"
+                                    }
+                                }
+
+                                // Step description
+                                Text {
+                                    text: modelData.description.length > 30 ? modelData.description.substring(0, 30) + "..." : modelData.description
+                                    font.pixelSize: 12
+                                    color: index === currentStepIndex ? "#ffffff" : "#2c3e50"
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    currentStepIndex = index
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        // Right side - Description (1/3 width)
+        // Right side - Step Details (2/3 width)
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: parent.width * 0.4
+            Layout.preferredWidth: parent.width * 0.7
             color: "#ffffff"
             radius: 10
             border.color: "#bdc3c7"
@@ -218,7 +435,7 @@ Item {
 
                 // Title
                 Text {
-                    text: careSteps[currentStepIndex].title
+                    text: careSteps.length > 0 ? careSteps[currentStepIndex].title : "Chưa có bước nào"
                     font.pixelSize: 18
                     font.bold: true
                     color: "#2c3e50"
@@ -226,9 +443,28 @@ Item {
                     Layout.fillWidth: true
                 }
 
+                // Image
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 200
+                    color: "#f8f9fa"
+                    radius: 8
+                    border.color: "#dee2e6"
+                    border.width: 1
+
+                    Image {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        source: careSteps.length > 0 ? careSteps[currentStepIndex].image : ""
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        antialiasing: true
+                    }
+                }
+
                 // Description
                 Text {
-                    text: careSteps[currentStepIndex].description
+                    text: careSteps.length > 0 ? careSteps[currentStepIndex].description : "Vui lòng chờ dữ liệu từ hệ thống..."
                     font.pixelSize: 14
                     color: "#34495e"
                     wrapMode: Text.WordWrap
@@ -266,7 +502,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
                     text: "⬅️ Quay lại"
-                    enabled: currentStepIndex > 0
+                    enabled: currentStepIndex > 0 && careSteps.length > 0
                     
                     background: Rectangle {
                         color: parent.enabled ? (parent.pressed ? "#95a5a6" : "#7f8c8d") : "#bdc3c7"
@@ -293,7 +529,7 @@ Item {
                 Button {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
-                    text: currentStepIndex < careSteps.length - 1 ? "Tiếp theo ➡️" : "Hoàn thành ✅"
+                    text: careSteps.length > 0 && currentStepIndex < careSteps.length - 1 ? "Tiếp theo ➡️" : "Hoàn thành ✅"
                     
                     background: Rectangle {
                         color: parent.pressed ? "#27ae60" : "#2ecc71"
@@ -316,13 +552,124 @@ Item {
                         }
                         
                         // Then navigate to next step
-                        if (currentStepIndex < careSteps.length - 1) {
+                        if (careSteps.length > 0 && currentStepIndex < careSteps.length - 1) {
                             currentStepIndex++
                         } else {
                             // Completed all steps
                             if (stackView) {
                                 stackView.pop()
                             }
+                        }
+                    }
+                }
+
+                // Debug button
+                Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+                    text: "🐛 Debug"
+                    
+                    background: Rectangle {
+                        color: parent.pressed ? "#9b59b6" : "#8e44ad"
+                        radius: 8
+                    }
+                    
+                    contentItem: Text {
+                        text: parent.text
+                        color: "#ffffff"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 14
+                        font.bold: true
+                    }
+
+                    onClicked: {
+                        debugAllSteps()
+                    }
+                }
+
+                // Force Process Buffer button
+                Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+                    text: "⚡ Process Buffer (" + stepBuffer.length + ")"
+                    enabled: stepBuffer.length > 0
+                    
+                    background: Rectangle {
+                        color: parent.enabled ? (parent.pressed ? "#e74c3c" : "#c0392b") : "#bdc3c7"
+                        radius: 8
+                    }
+                    
+                    contentItem: Text {
+                        text: parent.text
+                        color: parent.enabled ? "#ffffff" : "#7f8c8d"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 12
+                        font.bold: true
+                    }
+
+                    onClicked: {
+                        if (stepBuffer.length > 0) {
+                            console.log("CareStepsScreen: Force processing buffer with", stepBuffer.length, "items")
+                            if (stepBufferTimer) {
+                                stepBufferTimer.stop()
+                            }
+                            processStepBuffer()
+                        }
+                    }
+                }
+
+                // Check Missing Steps button
+                Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+                    text: "🔍 Check Missing Steps"
+                    
+                    background: Rectangle {
+                        color: parent.pressed ? "#16a085" : "#1abc9c"
+                        radius: 8
+                    }
+                    
+                    contentItem: Text {
+                        text: parent.text
+                        color: "#ffffff"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 12
+                        font.bold: true
+                    }
+
+                    onClicked: {
+                        checkForMissingSteps()
+                    }
+                }
+
+                // Process All Received Steps button
+                Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+                    text: "📋 Process All Steps (" + allReceivedSteps.length + ")"
+                    enabled: allReceivedSteps.length > 0
+                    
+                    background: Rectangle {
+                        color: parent.enabled ? (parent.pressed ? "#e67e22" : "#f39c12") : "#bdc3c7"
+                        radius: 8
+                    }
+                    
+                    contentItem: Text {
+                        text: parent.text
+                        color: parent.enabled ? "#ffffff" : "#7f8c8d"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 12
+                        font.bold: true
+                    }
+
+                    onClicked: {
+                        if (allReceivedSteps.length > 0) {
+                            console.log("CareStepsScreen: Force processing all received steps")
+                            processAllReceivedSteps()
                         }
                     }
                 }
@@ -367,7 +714,7 @@ Item {
         color: "#ecf0f1"
 
         Rectangle {
-            width: parent.width * ((currentStepIndex + 1) / careSteps.length)
+            width: careSteps.length > 0 ? parent.width * ((currentStepIndex + 1) / careSteps.length) : 0
             height: parent.height
             color: "#3498db"
             Behavior on width {
@@ -410,6 +757,7 @@ Item {
             }
         }
     }
+
     // Connect to TSS Socket signals
     Connections {
         target: tssSocketBridge
@@ -420,31 +768,56 @@ Item {
             console.log("Step Description:", tssSocketBridge.currentStepDescription)
             console.log("Has Image:", tssSocketBridge.currentImageBase64.length > 0)
             
-            // Add the received data to the queue for later use
-            addToTSSQueue(
-                tssSocketBridge.currentStepNumber,
-                tssSocketBridge.currentStepDescription,
-                tssSocketBridge.currentImageBase64
-            )
-            
             // Show the TSS data received indicator
             tssDataIndicator.visible = true
             showAnimation.start()
             
-            // Apply the data immediately to display it right away
-            applyTSSDataDirectly(
+            // Store this step in allReceivedSteps array
+            let stepData = {
+                stepNumber: tssSocketBridge.currentStepNumber,
+                stepDescription: tssSocketBridge.currentStepDescription,
+                imageBase64: tssSocketBridge.currentImageBase64,
+                timestamp: Date.now()
+            }
+            
+            // Check if step already exists in allReceivedSteps
+            let existingIndex = -1
+            for (let i = 0; i < allReceivedSteps.length; i++) {
+                if (allReceivedSteps[i].stepNumber === tssSocketBridge.currentStepNumber) {
+                    existingIndex = i
+                    break
+                }
+            }
+            
+            if (existingIndex >= 0) {
+                // Update existing step
+                allReceivedSteps[existingIndex] = stepData
+                console.log("CareStepsScreen: Updated existing step", tssSocketBridge.currentStepNumber, "in allReceivedSteps")
+            } else {
+                // Add new step
+                allReceivedSteps.push(stepData)
+                console.log("CareStepsScreen: Added new step", tssSocketBridge.currentStepNumber, "to allReceivedSteps")
+            }
+            
+            console.log("CareStepsScreen: Total steps in allReceivedSteps:", allReceivedSteps.length)
+            console.log("CareStepsScreen: AllReceivedSteps step numbers:", JSON.stringify(allReceivedSteps.map(s => s.stepNumber)))
+            
+            // Add step to buffer
+            addStepToBuffer(
                 tssSocketBridge.currentStepNumber,
                 tssSocketBridge.currentStepDescription,
                 tssSocketBridge.currentImageBase64
             )
             
-            // Navigate to the received step
-            let receivedStepIndex = tssSocketBridge.currentStepNumber - 1
-            if (receivedStepIndex >= 0 && receivedStepIndex < careSteps.length) {
-                console.log("CareStepsScreen: Navigating to received step", tssSocketBridge.currentStepNumber, "(index", receivedStepIndex, ")")
-                currentStepIndex = receivedStepIndex
+            // If this is step 1, process all received steps immediately
+            if (tssSocketBridge.currentStepNumber === 1) {
+                console.log("CareStepsScreen: Step 1 received, processing all received steps immediately")
+                if (stepBufferTimer) {
+                    stepBufferTimer.stop()
+                }
+                processAllReceivedSteps()
             } else {
-                console.log("CareStepsScreen: Received step number out of range:", tssSocketBridge.currentStepNumber)
+                console.log("CareStepsScreen: Step", tssSocketBridge.currentStepNumber, "added to buffer, waiting for more steps...")
             }
         }
 
@@ -464,28 +837,41 @@ Item {
             tssSocketBridge.connectToServer()
         }
         
-        // Check if there's already TSS data available
-        if (tssSocketBridge && tssSocketBridge.currentStepNumber > 0) {
-            console.log("CareStepsScreen: Found existing TSS data, applying it")
-            applyTSSDataDirectly(
-                tssSocketBridge.currentStepNumber,
-                tssSocketBridge.currentStepDescription,
-                tssSocketBridge.currentImageBase64
-            )
+        // Check if there are global steps available
+        if (stackView && stackView.get(0) && stackView.get(0).globalAllSteps && stackView.get(0).globalAllSteps.length > 0) {
+            console.log("CareStepsScreen: Found global steps, copying to allReceivedSteps")
+            allReceivedSteps = stackView.get(0).globalAllSteps.slice() // Copy array
+            console.log("CareStepsScreen: Copied", allReceivedSteps.length, "steps from global")
+            console.log("CareStepsScreen: Global step numbers:", JSON.stringify(allReceivedSteps.map(s => s.stepNumber)))
             
-            // Navigate to the step that has data
-            let stepIndex = tssSocketBridge.currentStepNumber - 1
-            if (stepIndex >= 0 && stepIndex < careSteps.length) {
-                console.log("CareStepsScreen: Navigating to step with existing data:", tssSocketBridge.currentStepNumber)
-                currentStepIndex = stepIndex
+            // Process all global steps immediately
+            processAllReceivedSteps()
+        } else if (tssSocketBridge && tssSocketBridge.currentStepNumber > 0) {
+            console.log("CareStepsScreen: Found existing TSS data, adding to allReceivedSteps")
+            
+            // Add current step to allReceivedSteps
+            let stepData = {
+                stepNumber: tssSocketBridge.currentStepNumber,
+                stepDescription: tssSocketBridge.currentStepDescription,
+                imageBase64: tssSocketBridge.currentImageBase64,
+                timestamp: Date.now()
             }
-        }
-        
-        // Check if there's queued data and apply it immediately
-        if (hasQueuedData && tssDataQueue.length > 0) {
-            console.log("CareStepsScreen: Found queued data on load, applying first step")
-            applyNextQueuedStep()
-            // Navigate to first step
+            allReceivedSteps.push(stepData)
+            
+            // If this is step 1, process all received steps immediately
+            if (tssSocketBridge.currentStepNumber === 1) {
+                console.log("CareStepsScreen: Found step 1, processing all received steps immediately")
+                processAllReceivedSteps()
+            } else {
+                // If we don't have step 1, create a placeholder and wait for more steps
+                console.log("CareStepsScreen: No step 1 found, creating placeholder and waiting for more steps")
+                addOrUpdateStep(1, "Đang chờ dữ liệu cho bước 1...", "")
+                currentStepIndex = 0
+            }
+        } else {
+            // No TSS data available, create placeholder for step 1
+            console.log("CareStepsScreen: No TSS data available, creating placeholder for step 1")
+            addOrUpdateStep(1, "Đang chờ dữ liệu cho bước 1...", "")
             currentStepIndex = 0
         }
     }

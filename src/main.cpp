@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QtQml>
 #include "../include/websocketbridge.h"
+#include "../include/tsssocketbridge.h"
 #include "../include/audiomanager.h"
 
 int main(int argc, char *argv[])
@@ -22,8 +23,14 @@ int main(int argc, char *argv[])
     // Create WebSocket bridge with proper parent
     WebSocketBridge *websocketBridge = new WebSocketBridge(&app);
     
+    // Create TSS Socket bridge with proper parent
+    TSSSocketBridge *tssSocketBridge = new TSSSocketBridge(&app);
+    
     // Expose WebSocket bridge to QML
     engine.rootContext()->setContextProperty("websocketBridge", websocketBridge);
+    
+    // Expose TSS Socket bridge to QML
+    engine.rootContext()->setContextProperty("tssSocketBridge", tssSocketBridge);
     
     // Set up error handling for QML warnings and errors
     QObject::connect(&engine, &QQmlApplicationEngine::warnings,
