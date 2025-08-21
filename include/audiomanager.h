@@ -36,6 +36,18 @@ public:
     Q_INVOKABLE int sampleRate() const { return 44100; }
     Q_INVOKABLE int channelCount() const { return 1; }
     Q_INVOKABLE int sampleSize() const { return 16; }
+    
+    // Kiểm tra trạng thái audio device
+    Q_INVOKABLE bool checkAudioDevice();
+    
+    // Debug methods
+    Q_INVOKABLE int getAudioBufferSize() const { return m_audioBuffer.size(); }
+    Q_INVOKABLE QString getAudioBufferInfo() const;
+    
+    // Auto-save methods
+    Q_INVOKABLE QString autoSaveAudio();
+    Q_INVOKABLE QString autoSaveBase64();
+    Q_INVOKABLE void autoSaveAll();
 
 signals:
     void errorOccurred(const QString &message);
@@ -45,6 +57,7 @@ signals:
     void isCapturingChanged();
     void hasRecordedDataChanged();
     void recordingSaved(bool success);
+    void autoSaveCompleted(const QString &audioFile, const QString &base64File);
 
 private:
     void captureAudioData();

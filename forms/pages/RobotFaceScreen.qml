@@ -593,6 +593,66 @@ Item {
                 }
             }
 
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 5
+
+                Button {
+                    text: "📡 Send"
+                    width: 50
+                    height: 25
+                    enabled: audioManagerRef.hasRecordedData && websocketBridge.isConnected
+                    background: Rectangle {
+                        color: parent.enabled ? (parent.pressed ? "#e67e22" : "#f39c12") : "#7f8c8d"
+                        radius: 3
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "white"
+                        font.pixelSize: 8
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    onClicked: {
+                        var base64Data = audioManagerRef.getWavAsBase64()
+                        if (base64Data.length > 0) {
+                            websocketBridge.sendMessage(base64Data)
+                            audioStatus.text = "📡 Sent via WebSocket"
+                            console.log("=== SENDING AUDIO VIA WEBSOCKET ===")
+                            console.log("WebSocket connected:", websocketBridge.isConnected)
+                            console.log("Base64 data length:", base64Data.length, "characters")
+                            console.log("Data preview:", base64Data.substring(0, 50) + "...")
+                            console.log("=== END WEBSOCKET SEND ===")
+                        }
+                    }
+                }
+
+                Button {
+                    text: "💾 Save"
+                    width: 50
+                    height: 25
+                    enabled: audioManagerRef.hasRecordedData
+                    background: Rectangle {
+                        color: parent.enabled ? (parent.pressed ? "#27ae60" : "#2ecc71") : "#7f8c8d"
+                        radius: 3
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "white"
+                        font.pixelSize: 8
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    onClicked: {
+                        audioManagerRef.autoSaveAll()
+                        audioStatus.text = "💾 Auto-saved files"
+                        console.log("=== AUTO SAVE TRIGGERED ===")
+                        console.log("Current directory:", Qt.resolvedUrl("."))
+                        console.log("=== END AUTO SAVE ===")
+                    }
+                }
+            }
+
             Text {
                 id: audioStatus
                 text: audioManagerRef.isCapturing ? "🔴 Recording..." : 
@@ -625,8 +685,27 @@ Item {
                 audioStatus.text = "✅ Recording complete"
                 audioStatus.color = "#2ecc71"
                 
-                // Auto-log base64 when recording stops
+                // Auto-save files when recording stops
                 if (audioManagerRef.hasRecordedData) {
+                    var audioFile = audioManagerRef.autoSaveAudio()
+                    var base64File = audioManagerRef.autoSaveBase64()
+                    
+                    console.log("=== AUTO SAVE ON RECORDING STOP ===")
+                    console.log("🎵 Recording completed - Files auto-saved")
+                    if (audioFile.length > 0) {
+                        console.log("📁 Audio file saved:", audioFile)
+                    }
+                    if (base64File.length > 0) {
+                        console.log("📄 Base64 file saved:", base64File)
+                    }
+                    console.log("=== END AUTO SAVE ===")
+                    
+                    // Update status with file locations
+                    if (audioFile.length > 0 && base64File.length > 0) {
+                        audioStatus.text = "✅ Saved: " + audioFile.split('/').pop() + ", " + base64File.split('/').pop()
+                    }
+                    
+                    // Auto-log base64 when recording stops
                     var base64Data = audioManagerRef.getWavAsBase64()
                     var rawBase64 = audioManagerRef.getAudioAsBase64()
                     
@@ -643,6 +722,16 @@ Item {
             function onAudioPlayed() {
                 audioStatus.text = "🔊 Playback finished"
                 audioStatus.color = "#3498db"
+            }
+            
+            function onAutoSaveCompleted(audioFile, base64File) {
+                console.log("=== AUTO SAVE COMPLETED SIGNAL ===")
+                console.log("📁 Audio file:", audioFile)
+                console.log("📄 Base64 file:", base64File)
+                console.log("=== END AUTO SAVE COMPLETED ===")
+                
+                audioStatus.text = "💾 Saved: " + audioFile.split('/').pop() + ", " + base64File.split('/').pop()
+                audioStatus.color = "#27ae60"
             }
         }
     }

@@ -4,6 +4,8 @@
 #include <QDateTime>
 #include <QDir>
 #include <QTimer>
+#include <QFileInfo>
+#include <QTextStream>
 
 AudioManager::AudioManager(QObject *parent)
     : QObject(parent)
@@ -22,10 +24,14 @@ bool AudioManager::startCapture()
 {
     int err;
 
+    qDebug() << "Starting audio capture...";
+
     // Open PCM device for capture
     err = snd_pcm_open(&m_captureHandle, "default", SND_PCM_STREAM_CAPTURE, 0);
     if (err < 0) {
-        emit errorOccurred(QString("Cannot open audio device: %1").arg(snd_strerror(err)));
+        QString errorMsg = QString("Cannot open audio device: %1").arg(snd_strerror(err));
+        qDebug() << "Audio capture error:" << errorMsg;
+        emit errorOccurred(errorMsg);
         return false;
     }
 
@@ -135,8 +141,8 @@ void AudioManager::captureAudioData()
     m_audioBuffer.append(buffer, err * 2); // 2 bytes per sample (16-bit)
     emit hasRecordedDataChanged();
 
-    // Continue capturing
-    QTimer::singleShot(0, this, &AudioManager::captureAudioData);
+    // Continue capturing with a small delay to prevent blocking
+    QTimer::singleShot(10, this, &AudioManager::captureAudioData);
 }
 
 void AudioManager::stopCapture()
@@ -164,24 +170,41 @@ bool AudioManager::playAudio()
         return false;
     }
 
+    qDebug() << "Starting audio playback, buffer size:" << m_audioBuffer.size() << "bytes";
+
     if (!setupPlayback()) {
         emit errorOccurred("Failed to setup playback");
         return false;
     }
 
-    // Play the audio buffer
-    int err = snd_pcm_writei(m_playbackHandle, m_audioBuffer.constData(), m_audioBuffer.size() / 2);
-    if (err < 0) {
-        emit errorOccurred(QString("Playback error: %1").arg(snd_strerror(err)));
-        snd_pcm_close(m_playbackHandle);
-        m_playbackHandle = nullptr;
-        return false;
+    // Play the audio buffer in chunks to prevent blocking
+    const int chunk_size = 4096;
+    const char* data = m_audioBuffer.constData();
+    int total_samples = m_audioBuffer.size() / 2; // 16-bit samples
+    int samples_written = 0;
+
+    while (samples_written < total_samples) {
+        int samples_to_write = qMin(chunk_size, total_samples - samples_written);
+        int err = snd_pcm_writei(m_playbackHandle, data + samples_written * 2, samples_to_write);
+        
+        if (err < 0) {
+            emit errorOccurred(QString("Playback error: %1").arg(snd_strerror(err)));
+            snd_pcm_close(m_playbackHandle);
+            m_playbackHandle = nullptr;
+            return false;
+        }
+        
+        samples_written += err;
+        
+        // Small delay to prevent blocking
+        QThread::msleep(1);
     }
 
     snd_pcm_drain(m_playbackHandle);
     snd_pcm_close(m_playbackHandle);
     m_playbackHandle = nullptr;
 
+    qDebug() << "Audio playback completed successfully";
     emit audioPlayed();
     return true;
 }
@@ -247,11 +270,45 @@ bool AudioManager::setupPlayback()
 
 bool AudioManager::saveToFile(const QString &filename)
 {
-    QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly)) {
-        emit errorOccurred("Cannot open file for writing: " + filename);
+    qDebug() << "=== saveToFile called ===";
+    qDebug() << "Filename:" << filename;
+    qDebug() << "Audio buffer empty:" << m_audioBuffer.isEmpty();
+    qDebug() << "Audio buffer size:" << m_audioBuffer.size() << "bytes";
+    
+    if (m_audioBuffer.isEmpty()) {
+        qDebug() << "ERROR: No audio data to save";
+        emit errorOccurred("No audio data to save");
         return false;
     }
+
+    // Ensure the directory exists
+    QFileInfo fileInfo(filename);
+    QDir dir = fileInfo.absoluteDir();
+    qDebug() << "Directory path:" << dir.absolutePath();
+    qDebug() << "Directory exists:" << dir.exists();
+    
+    if (!dir.exists()) {
+        qDebug() << "Creating directory:" << dir.absolutePath();
+        if (!dir.mkpath(".")) {
+            QString errorMsg = "Cannot create directory: " + dir.absolutePath();
+            qDebug() << "ERROR:" << errorMsg;
+            emit errorOccurred(errorMsg);
+            return false;
+        }
+    }
+
+    QFile file(filename);
+    qDebug() << "Opening file for writing:" << filename;
+    if (!file.open(QIODevice::WriteOnly)) {
+        QString errorMsg = QString("Cannot open file for writing: %1 - %2").arg(filename).arg(file.errorString());
+        qDebug() << "ERROR:" << errorMsg;
+        emit errorOccurred(errorMsg);
+        return false;
+    }
+
+    qDebug() << "File opened successfully";
+    qDebug() << "Saving audio file:" << filename;
+    qDebug() << "Audio buffer size:" << m_audioBuffer.size() << "bytes";
 
     // Write WAV header (simplified)
     // Note: This is a basic implementation, you might want to use a proper WAV library
@@ -285,13 +342,41 @@ bool AudioManager::saveToFile(const QString &filename)
     quint32 dataSize = m_audioBuffer.size();
     header.replace(40, 4, reinterpret_cast<const char*>(&dataSize), 4);
 
-    if (file.write(header) != header.size() || file.write(m_audioBuffer) != m_audioBuffer.size()) {
+    qDebug() << "Writing WAV header, size:" << header.size() << "bytes";
+    qint64 headerWritten = file.write(header);
+    qDebug() << "Header written:" << headerWritten << "bytes";
+    
+    qDebug() << "Writing audio data, size:" << m_audioBuffer.size() << "bytes";
+    qint64 dataWritten = file.write(m_audioBuffer);
+    qDebug() << "Data written:" << dataWritten << "bytes";
+    
+    if (headerWritten != header.size() || dataWritten != m_audioBuffer.size()) {
+        QString errorMsg = QString("Failed to write audio data to file. Header: %1/%2, Data: %3/%4")
+                          .arg(headerWritten).arg(header.size())
+                          .arg(dataWritten).arg(m_audioBuffer.size());
+        qDebug() << "ERROR:" << errorMsg;
         file.close();
-        emit errorOccurred("Failed to write audio data to file");
+        emit errorOccurred(errorMsg);
         return false;
     }
 
     file.close();
+    qDebug() << "File closed successfully";
+    
+    // Verify file was created and has correct size
+    QFileInfo savedFile(filename);
+    qDebug() << "Saved file exists:" << savedFile.exists();
+    qDebug() << "Saved file size:" << savedFile.size() << "bytes";
+    qDebug() << "Expected file size:" << (header.size() + m_audioBuffer.size()) << "bytes";
+    
+    if (!savedFile.exists()) {
+        qDebug() << "ERROR: File was not created!";
+        emit errorOccurred("File was not created after writing");
+        return false;
+    }
+    
+    qDebug() << "Audio file saved successfully:" << filename;
+    qDebug() << "File size:" << savedFile.size() << "bytes";
     emit recordingSaved(true);
     return true;
 }
@@ -338,6 +423,20 @@ QString AudioManager::getAudioAsBase64() const
     qDebug() << "  - Base64 preview:" << base64Data.left(50) + "...";
     
     return base64Data;
+}
+
+bool AudioManager::checkAudioDevice()
+{
+    snd_pcm_t *testHandle;
+    int err = snd_pcm_open(&testHandle, "default", SND_PCM_STREAM_CAPTURE, 0);
+    if (err < 0) {
+        qDebug() << "Audio device check failed:" << snd_strerror(err);
+        return false;
+    }
+    
+    snd_pcm_close(testHandle);
+    qDebug() << "Audio device check passed";
+    return true;
 }
 
 bool AudioManager::loadFromBase64(const QString &base64Data)
@@ -413,4 +512,100 @@ QString AudioManager::getWavAsBase64() const
     qDebug() << "  - Full Base64 WAV data:" << base64Data;
     
     return base64Data;
+}
+
+QString AudioManager::getAudioBufferInfo() const
+{
+    QString info = QString("Audio Buffer Info:\n");
+    info += QString("- Size: %1 bytes\n").arg(m_audioBuffer.size());
+    info += QString("- Empty: %1\n").arg(m_audioBuffer.isEmpty() ? "Yes" : "No");
+    info += QString("- Duration: %1 seconds\n").arg(m_audioBuffer.size() / (44100 * 2)); // 44.1kHz, 16-bit, mono
+    return info;
+}
+
+QString AudioManager::autoSaveAudio()
+{
+    if (m_audioBuffer.isEmpty()) {
+        qDebug() << "ERROR: No audio data to auto-save";
+        return QString();
+    }
+
+    // Create timestamp for filename
+    QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm-ss");
+    QString filename = QString("audio_%1.wav").arg(timestamp);
+    
+    // Get current working directory
+    QString currentDir = QDir::currentPath();
+    QString fullPath = QDir(currentDir).filePath(filename);
+    
+    qDebug() << "Auto-saving audio to:" << fullPath;
+    
+    if (saveToFile(fullPath)) {
+        qDebug() << "Auto-save audio successful:" << fullPath;
+        return fullPath;
+    } else {
+        qDebug() << "Auto-save audio failed:" << fullPath;
+        return QString();
+    }
+}
+
+QString AudioManager::autoSaveBase64()
+{
+    if (m_audioBuffer.isEmpty()) {
+        qDebug() << "ERROR: No audio data to auto-save as base64";
+        return QString();
+    }
+
+    // Create timestamp for filename
+    QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm-ss");
+    QString filename = QString("audio_%1_base64.txt").arg(timestamp);
+    
+    // Get current working directory
+    QString currentDir = QDir::currentPath();
+    QString fullPath = QDir(currentDir).filePath(filename);
+    
+    qDebug() << "Auto-saving base64 to:" << fullPath;
+    
+    // Generate base64 data
+    QString base64Data = getWavAsBase64();
+    if (base64Data.isEmpty()) {
+        qDebug() << "ERROR: Failed to generate base64 data";
+        return QString();
+    }
+    
+    // Save base64 to file
+    QFile file(fullPath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "ERROR: Cannot open base64 file for writing:" << fullPath << "-" << file.errorString();
+        return QString();
+    }
+    
+    QTextStream out(&file);
+    out << base64Data;
+    file.close();
+    
+    qDebug() << "Auto-save base64 successful:" << fullPath;
+    qDebug() << "Base64 file size:" << base64Data.length() << "characters";
+    return fullPath;
+}
+
+void AudioManager::autoSaveAll()
+{
+    qDebug() << "=== AUTO SAVE ALL ===";
+    
+    QString audioFile = autoSaveAudio();
+    QString base64File = autoSaveBase64();
+    
+    if (!audioFile.isEmpty() && !base64File.isEmpty()) {
+        qDebug() << "Auto-save all successful:";
+        qDebug() << "  Audio file:" << audioFile;
+        qDebug() << "  Base64 file:" << base64File;
+        emit recordingSaved(true);
+        emit autoSaveCompleted(audioFile, base64File);
+    } else {
+        qDebug() << "Auto-save all failed";
+        emit recordingSaved(false);
+    }
+    
+    qDebug() << "=== END AUTO SAVE ALL ===";
 }
