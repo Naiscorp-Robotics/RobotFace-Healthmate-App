@@ -170,12 +170,16 @@ bool AudioManager::playAudio()
         return false;
     }
 
-    qDebug() << "Starting audio playback, buffer size:" << m_audioBuffer.size() << "bytes";
+    qDebug() << "AudioManager::playAudio() - Starting playback";
+    qDebug() << "  - Buffer size:" << m_audioBuffer.size() << "bytes";
+    qDebug() << "  - Estimated duration:" << (m_audioBuffer.size() / (44100 * 2)) << "seconds";
 
     if (!setupPlayback()) {
         emit errorOccurred("Failed to setup playback");
         return false;
     }
+
+    qDebug() << "AudioManager::playAudio() - Playback setup completed, starting audio output";
 
     // Play the audio buffer in chunks to prevent blocking
     const int chunk_size = 4096;
@@ -204,7 +208,7 @@ bool AudioManager::playAudio()
     snd_pcm_close(m_playbackHandle);
     m_playbackHandle = nullptr;
 
-    qDebug() << "Audio playback completed successfully";
+    qDebug() << "AudioManager::playAudio() - Playback completed successfully";
     emit audioPlayed();
     return true;
 }
@@ -442,18 +446,68 @@ bool AudioManager::checkAudioDevice()
 bool AudioManager::loadFromBase64(const QString &base64Data)
 {
     if (base64Data.isEmpty()) {
+        qDebug() << "AudioManager::loadFromBase64() - Base64 data is empty";
         emit errorOccurred("Base64 data is empty");
         return false;
     }
     
-    QByteArray audioData = QByteArray::fromBase64(base64Data.toUtf8());
+    qDebug() << "AudioManager::loadFromBase64() - Starting decode";
+    qDebug() << "  - Base64 string length:" << base64Data.length() << "characters";
+    qDebug() << "  - Base64 preview:" << base64Data.left(50) + "...";
+    
+    // Validate base64 format
+    if (base64Data.length() < 100) {
+        qDebug() << "AudioManager::loadFromBase64() - Base64 data too short, likely invalid";
+        emit errorOccurred("Base64 data too short");
+        return false;
+    }
+    
+    // Check if it's a valid base64 string (only contains valid characters)
+    QRegExp base64Pattern("^[A-Za-z0-9+/]*={0,2}$");
+    if (!base64Pattern.exactMatch(base64Data)) {
+        qDebug() << "AudioManager::loadFromBase64() - Invalid base64 format";
+        emit errorOccurred("Invalid base64 format");
+        return false;
+    }
+    
+    // Decode base64 to binary data using optimized method
+    QByteArray audioData;
+    try {
+        audioData = QByteArray::fromBase64(base64Data.toUtf8());
+    } catch (...) {
+        qDebug() << "AudioManager::loadFromBase64() - Exception during base64 decode";
+        emit errorOccurred("Exception during base64 decode");
+        return false;
+    }
+    
     if (audioData.isEmpty()) {
+        qDebug() << "AudioManager::loadFromBase64() - Failed to decode base64 data";
         emit errorOccurred("Failed to decode base64 data");
         return false;
     }
     
+    qDebug() << "AudioManager::loadFromBase64() - Successfully decoded";
+    qDebug() << "  - Decoded audio size:" << audioData.size() << "bytes";
+    qDebug() << "  - Estimated duration:" << (audioData.size() / (44100 * 2)) << "seconds";
+    
+    // Validate audio data size (should be reasonable for audio)
+    if (audioData.size() < 1000) {
+        qDebug() << "AudioManager::loadFromBase64() - Audio data too small, likely invalid";
+        emit errorOccurred("Audio data too small");
+        return false;
+    }
+    
+    if (audioData.size() > 10 * 1024 * 1024) { // 10MB limit
+        qDebug() << "AudioManager::loadFromBase64() - Audio data too large";
+        emit errorOccurred("Audio data too large");
+        return false;
+    }
+    
+    // Store in audio buffer
     m_audioBuffer = audioData;
     emit hasRecordedDataChanged();
+    
+    qDebug() << "AudioManager::loadFromBase64() - Audio data loaded successfully";
     return true;
 }
 
@@ -608,4 +662,37 @@ void AudioManager::autoSaveAll()
     }
     
     qDebug() << "=== END AUTO SAVE ALL ===";
+}
+
+bool AudioManager::loadFromByteArray(const QByteArray &audioData)
+{
+    if (audioData.isEmpty()) {
+        qDebug() << "AudioManager::loadFromByteArray() - Audio data is empty";
+        emit errorOccurred("Audio data is empty");
+        return false;
+    }
+    
+    qDebug() << "AudioManager::loadFromByteArray() - Loading audio data directly";
+    qDebug() << "  - Audio data size:" << audioData.size() << "bytes";
+    qDebug() << "  - Estimated duration:" << (audioData.size() / (44100 * 2)) << "seconds";
+    
+    // Validate audio data size
+    if (audioData.size() < 1000) {
+        qDebug() << "AudioManager::loadFromByteArray() - Audio data too small";
+        emit errorOccurred("Audio data too small");
+        return false;
+    }
+    
+    if (audioData.size() > 10 * 1024 * 1024) { // 10MB limit
+        qDebug() << "AudioManager::loadFromByteArray() - Audio data too large";
+        emit errorOccurred("Audio data too large");
+        return false;
+    }
+    
+    // Store in audio buffer
+    m_audioBuffer = audioData;
+    emit hasRecordedDataChanged();
+    
+    qDebug() << "AudioManager::loadFromByteArray() - Audio data loaded successfully";
+    return true;
 }

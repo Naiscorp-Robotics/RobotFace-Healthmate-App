@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import AudioController 1.0
 
 Item {
     id: root
@@ -27,14 +28,216 @@ Item {
     // Global variable to store all steps across instances
     property var globalAllSteps: []
 
+    // Audio Controller for voice playback
+    AudioController {
+        id: voicePlayer
+        
+        onErrorOccurred: function(message) {
+            console.log("Voice Player Error:", message)
+            voiceStatus.text = "❌ Lỗi: " + message
+            voiceStatus.color = "#e74c3c"
+        }
+        
+        onAudioPlayed: {
+            console.log("Voice playback completed")
+            voiceStatus.text = "✅ Phát âm thanh hoàn thành"
+            voiceStatus.color = "#27ae60"
+        }
+    }
+    
+    // Voice status indicator
+    Text {
+        id: voiceStatus
+        anchors.top: header.bottom
+        anchors.left: parent.left
+        anchors.margins: 10
+        anchors.topMargin: 15
+        text: "🔊 Sẵn sàng phát âm thanh"
+        color: "#3498db"
+        font.pixelSize: 12
+        font.bold: true
+        z: 10
+    }
+
+    // Function to decode base64 and load audio directly
+    function playVoiceFromBase64Optimized(voiceBase64) {
+        console.log("CareStepsScreen: Attempting to play voice from base64 (optimized)")
+        console.log("CareStepsScreen: Original base64 length:", voiceBase64 ? voiceBase64.length : 0)
+        
+        if (voiceBase64 && voiceBase64.length > 0) {
+            // Clean the base64 data
+            var cleanBase64 = voiceBase64.replace(/^data:audio\/[a-zA-Z0-9.+-]+;base64,/, "")
+                                         .replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "")
+                                         .replace(/\r?\n|\r/g, "")
+                                         .replace(/\s/g, "")
+            
+            console.log("CareStepsScreen: Cleaned base64 length:", cleanBase64.length)
+            
+            if (cleanBase64.length < 100) {
+                console.log("CareStepsScreen: Base64 too short, likely invalid")
+                playDefaultVoice()
+                return
+            }
+            
+            voiceStatus.text = "🔄 Đang phát âm thanh từ server..."
+            voiceStatus.color = "#f39c12"
+            
+            // Try to load and play
+            if (voicePlayer.loadFromBase64(cleanBase64)) {
+                console.log("CareStepsScreen: Successfully loaded server audio, starting playback...")
+                voicePlayer.playAudio()
+            } else {
+                console.log("CareStepsScreen: Failed to load voice from base64, falling back to default")
+                playDefaultVoice()
+            }
+        } else {
+            console.log("CareStepsScreen: No voice data from server, playing default voice")
+            voiceStatus.text = "🔄 Đang phát âm thanh mặc định..."
+            voiceStatus.color = "#f39c12"
+            playDefaultVoice()
+        }
+    }
+
+    // Function to play voice from base64
+    function playVoiceFromBase64(voiceBase64) {
+        console.log("CareStepsScreen: Attempting to play voice from base64")
+        console.log("CareStepsScreen: Original base64 length:", voiceBase64 ? voiceBase64.length : 0)
+        console.log("CareStepsScreen: Original base64 preview:", voiceBase64 ? voiceBase64.substring(0, 100) + "..." : "null")
+        
+        if (voiceBase64 && voiceBase64.length > 0) {
+            // Clean the base64 data - remove data URI prefix and whitespace
+            var cleanBase64 = voiceBase64.replace(/^data:audio\/[a-zA-Z0-9.+-]+;base64,/, "")
+                                         .replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "")
+                                         .replace(/\r?\n|\r/g, "")
+                                         .replace(/\s/g, "")
+            
+            console.log("CareStepsScreen: Cleaned base64 length:", cleanBase64.length)
+            console.log("CareStepsScreen: Cleaned base64 preview:", cleanBase64.substring(0, 100) + "...")
+            
+            // Server returned voice data, play it
+            console.log("CareStepsScreen: Playing voice from server data")
+            voiceStatus.text = "🔄 Đang phát âm thanh từ server..."
+            voiceStatus.color = "#f39c12"
+            
+            // Pre-load audio data to reduce latency
+            if (voicePlayer.loadFromBase64(cleanBase64)) {
+                console.log("CareStepsScreen: Successfully loaded server audio, starting playback...")
+                voicePlayer.playAudio()
+            } else {
+                console.log("CareStepsScreen: Failed to load voice from base64, falling back to default")
+                console.log("CareStepsScreen: Cleaned base64 was invalid or corrupted")
+                playDefaultVoice()
+            }
+        } else {
+            // No voice data from server, play default voice
+            console.log("CareStepsScreen: No voice data from server, playing default voice")
+            voiceStatus.text = "🔄 Đang phát âm thanh mặc định..."
+            voiceStatus.color = "#f39c12"
+            playDefaultVoice()
+        }
+    }
+    
+    // Function to play default voice from assets/voice_base.txt
+    function playDefaultVoice() {
+        console.log("CareStepsScreen: Loading default voice from assets/voice_base.txt")
+        
+        // Try multiple approaches to load the file
+        loadVoiceFileWithRetry()
+    }
+    
+    // Function to try different methods to load voice file
+    function loadVoiceFileWithRetry() {
+        console.log("CareStepsScreen: Trying to load voice file with multiple methods...")
+        
+        // Method 1: Try dedicated voice file reader
+        if (fileHelper) {
+            console.log("CareStepsScreen: Method 1 - Using dedicated voice file reader")
+            var base64Data = fileHelper.readVoiceBaseFile()
+            console.log("CareStepsScreen: Dedicated reader result length:", base64Data.length)
+            
+            if (base64Data && base64Data.length > 1000) { // Check if we got substantial data
+                console.log("CareStepsScreen: Successfully loaded voice from dedicated reader")
+                if (voicePlayer.loadFromBase64(base64Data)) {
+                    voicePlayer.playAudio()
+                    return
+                }
+            }
+        }
+        
+        // Method 2: Try FileHelper with resource path
+        if (fileHelper && fileHelper.resourceFileExists("qrc:/assets/voice_base.txt")) {
+            console.log("CareStepsScreen: Method 2 - Using FileHelper with resource path")
+            var base64Data = fileHelper.readResourceFile("qrc:/assets/voice_base.txt")
+            console.log("CareStepsScreen: FileHelper result length:", base64Data.length)
+            
+            if (base64Data && base64Data.length > 1000) { // Check if we got substantial data
+                console.log("CareStepsScreen: Successfully loaded voice from FileHelper")
+                if (voicePlayer.loadFromBase64(base64Data)) {
+                    voicePlayer.playAudio()
+                    return
+                }
+            }
+        }
+        
+        // Method 3: Try XMLHttpRequest
+        console.log("CareStepsScreen: Method 3 - Using XMLHttpRequest")
+        loadVoiceWithXMLHttpRequest()
+    }
+    
+    // Function to load voice using XMLHttpRequest
+    function loadVoiceWithXMLHttpRequest() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "qrc:/assets/voice_base.txt")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    var base64Data = xhr.responseText.trim()
+                    console.log("CareStepsScreen: XMLHttpRequest loaded voice, length:", base64Data.length)
+                    
+                    if (base64Data && base64Data.length > 1000) {
+                        console.log("CareStepsScreen: Successfully loaded voice from XMLHttpRequest")
+                        if (voicePlayer.loadFromBase64(base64Data)) {
+                            voicePlayer.playAudio()
+                            return
+                        }
+                    }
+                }
+                
+                // If XMLHttpRequest failed, try fallback
+                console.log("CareStepsScreen: XMLHttpRequest failed, using fallback")
+                playDefaultVoiceFallback()
+            }
+        }
+        xhr.send()
+    }
+    
+    // Fallback function with hardcoded base64 audio (short beep)
+    function playDefaultVoiceFallback() {
+        console.log("CareStepsScreen: Using fallback voice (short beep)")
+        voiceStatus.text = "🔄 Đang phát âm thanh mặc định (fallback)..."
+        voiceStatus.color = "#f39c12"
+        
+        // Short beep sound in base64 (WAV format)
+        var fallbackBase64 = "UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT"
+        
+        if (voicePlayer.loadFromBase64(fallbackBase64)) {
+            voicePlayer.playAudio()
+        } else {
+            console.log("CareStepsScreen: Failed to load fallback voice")
+            voiceStatus.text = "❌ Không thể phát âm thanh mặc định"
+            voiceStatus.color = "#e74c3c"
+        }
+    }
+
     // Function to add step to buffer and start timer
-    function addStepToBuffer(stepNumber, stepDescription, imageBase64) {
+    function addStepToBuffer(stepNumber, stepDescription, imageBase64, voiceBase64) {
         console.log("CareStepsScreen: Adding step to buffer - Step", stepNumber, ":", stepDescription.substring(0, 50) + "...")
         
         let stepData = {
             stepNumber: stepNumber,
             stepDescription: stepDescription,
             imageBase64: imageBase64,
+            voiceBase64: voiceBase64 || "",
             timestamp: Date.now()
         }
         
@@ -84,7 +287,7 @@ Item {
         for (let i = 0; i < stepBuffer.length; i++) {
             let stepData = stepBuffer[i]
             console.log("CareStepsScreen: Processing step", stepData.stepNumber, "from buffer")
-            addOrUpdateStep(stepData.stepNumber, stepData.stepDescription, stepData.imageBase64)
+            addOrUpdateStep(stepData.stepNumber, stepData.stepDescription, stepData.imageBase64, stepData.voiceBase64)
         }
         
         // Clear buffer
@@ -123,7 +326,7 @@ Item {
             console.log("CareStepsScreen: Applying queued step data:", stepData)
             
             // Add or update step in the dynamic list
-            addOrUpdateStep(stepData.stepNumber, stepData.stepDescription, stepData.imageBase64)
+            addOrUpdateStep(stepData.stepNumber, stepData.stepDescription, stepData.imageBase64, stepData.voiceBase64)
             
             // Update queue status
             hasQueuedData = tssDataQueue.length > 0
@@ -134,8 +337,10 @@ Item {
     }
 
     // Function to add or update a step in the dynamic list
-    function addOrUpdateStep(stepNumber, stepDescription, imageBase64) {
+    function addOrUpdateStep(stepNumber, stepDescription, imageBase64, voiceBase64) {
         console.log("CareStepsScreen: Adding/updating step", stepNumber, "with description:", stepDescription.substring(0, 50) + "...")
+        console.log("CareStepsScreen: Step", stepNumber, "voiceBase64 length:", voiceBase64 ? voiceBase64.length : 0)
+        console.log("CareStepsScreen: Step", stepNumber, "voiceBase64 preview:", voiceBase64 ? voiceBase64.substring(0, 100) + "..." : "null")
         
         // Find if step already exists
         let existingIndex = -1
@@ -150,17 +355,20 @@ Item {
             stepNumber: stepNumber,
             title: "Bước " + stepNumber + ": " + stepDescription,
             description: stepDescription,
-            image: imageBase64 && imageBase64.length > 0 ? "data:image/png;base64," + imageBase64 : "qrc:/assets/j97.jpg"
+            image: imageBase64 && imageBase64.length > 0 ? "data:image/png;base64," + imageBase64 : "qrc:/assets/j97.jpg",
+            voiceBase64: voiceBase64 || ""
         }
         
         if (existingIndex >= 0) {
             // Update existing step
             careSteps[existingIndex] = stepData
             console.log("CareStepsScreen: Updated existing step", stepNumber, "at index", existingIndex)
+            console.log("CareStepsScreen: Updated step voiceBase64 length:", careSteps[existingIndex].voiceBase64.length)
         } else {
             // Add new step
             careSteps.push(stepData)
             console.log("CareStepsScreen: Added new step", stepNumber, "at index", careSteps.length - 1)
+            console.log("CareStepsScreen: New step voiceBase64 length:", careSteps[careSteps.length - 1].voiceBase64.length)
         }
         
         // Sort steps by step number
@@ -183,7 +391,7 @@ Item {
         console.log("CareStepsScreen: Total steps now:", careSteps.length)
         console.log("CareStepsScreen: Current step index:", currentStepIndex)
         console.log("CareStepsScreen: All step numbers:", JSON.stringify(careSteps.map(s => s.stepNumber)))
-        console.log("CareStepsScreen: All step titles:", JSON.stringify(careSteps.map(s => s.title.substring(0, 30) + "...")))
+        console.log("CareStepsScreen: All step voiceBase64 lengths:", JSON.stringify(careSteps.map(s => s.voiceBase64.length)))
     }
 
     // Function to navigate to a specific step
@@ -206,9 +414,9 @@ Item {
     }
 
     // Function to directly apply TSS data to a specific step
-    function applyTSSDataDirectly(stepNumber, stepDescription, imageBase64) {
+    function applyTSSDataDirectly(stepNumber, stepDescription, imageBase64, voiceBase64) {
         console.log("CareStepsScreen: Applying TSS data directly to step", stepNumber)
-        addOrUpdateStep(stepNumber, stepDescription, imageBase64)
+        addOrUpdateStep(stepNumber, stepDescription, imageBase64, voiceBase64)
     }
 
     // Function to debug and show all current steps
@@ -218,6 +426,8 @@ Item {
         console.log("Current step index:", currentStepIndex)
         for (let i = 0; i < careSteps.length; i++) {
             console.log("Step", i, ":", careSteps[i].stepNumber, "-", careSteps[i].title.substring(0, 50) + "...")
+            console.log("  - voiceBase64 length:", careSteps[i].voiceBase64.length)
+            console.log("  - voiceBase64 preview:", careSteps[i].voiceBase64.substring(0, 100) + "...")
         }
         console.log("=======================")
     }
@@ -242,7 +452,7 @@ Item {
         for (let i = 0; i < allReceivedSteps.length; i++) {
             let stepData = allReceivedSteps[i]
             console.log("CareStepsScreen: Processing step", stepData.stepNumber, "from allReceivedSteps")
-            addOrUpdateStep(stepData.stepNumber, stepData.stepDescription, stepData.imageBase64)
+            addOrUpdateStep(stepData.stepNumber, stepData.stepDescription, stepData.imageBase64, stepData.voiceBase64)
         }
         
         // Set current step to step 1
@@ -409,7 +619,27 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: {
+                                    // First navigate to the selected step
                                     currentStepIndex = index
+                                    console.log("CareStepsScreen: Step clicked - Navigated to Index:", index, "Step Number:", modelData.stepNumber)
+                                    
+                                    // Then auto-play voice for the selected step after a short delay
+                                    if (careSteps.length > 0) {
+                                        var selectedStep = careSteps[index]
+                                        var voiceBase64 = selectedStep.voiceBase64 || ""
+                                        console.log("CareStepsScreen: Selected step voiceBase64 length:", voiceBase64.length)
+                                        
+                                        // Use Timer to delay audio playback slightly to ensure UI is updated first
+                                        Qt.setTimeout(function() {
+                                            if (voiceBase64 && voiceBase64.length > 0) {
+                                                console.log("CareStepsScreen: Auto-playing voice for step", modelData.stepNumber)
+                                                playVoiceFromBase64(voiceBase64)
+                                            } else {
+                                                console.log("CareStepsScreen: No voice data for step", modelData.stepNumber, "- playing default voice")
+                                                playDefaultVoice()
+                                            }
+                                        }, 100) // 100ms delay
+                                    }
                                 }
                             }
                         }
@@ -520,7 +750,25 @@ Item {
 
                     onClicked: {
                         if (currentStepIndex > 0) {
+                            // First navigate to previous step
                             currentStepIndex--
+                            console.log("CareStepsScreen: Back button - Navigated to step", currentStepIndex + 1)
+                            
+                            // Then auto-play voice for the new current step after a short delay
+                            if (careSteps.length > 0) {
+                                var currentStep = careSteps[currentStepIndex]
+                                var voiceBase64 = currentStep.voiceBase64 || ""
+                                console.log("CareStepsScreen: Back button - Will auto-play voice for step", currentStep.stepNumber)
+                                
+                                // Use Timer to delay audio playback slightly to ensure UI is updated first
+                                Qt.setTimeout(function() {
+                                    if (voiceBase64 && voiceBase64.length > 0) {
+                                        playVoiceFromBase64(voiceBase64)
+                                    } else {
+                                        playDefaultVoice()
+                                    }
+                                }, 100) // 100ms delay
+                            }
                         }
                     }
                 }
@@ -553,7 +801,23 @@ Item {
                         
                         // Then navigate to next step
                         if (careSteps.length > 0 && currentStepIndex < careSteps.length - 1) {
+                            // First navigate to next step
                             currentStepIndex++
+                            console.log("CareStepsScreen: Next button - Navigated to step", currentStepIndex + 1)
+                            
+                            // Then auto-play voice for the new current step after a short delay
+                            var currentStep = careSteps[currentStepIndex]
+                            var voiceBase64 = currentStep.voiceBase64 || ""
+                            console.log("CareStepsScreen: Next button - Will auto-play voice for step", currentStep.stepNumber)
+                            
+                            // Use Timer to delay audio playback slightly to ensure UI is updated first
+                            Qt.setTimeout(function() {
+                                if (voiceBase64 && voiceBase64.length > 0) {
+                                    playVoiceFromBase64(voiceBase64)
+                                } else {
+                                    playDefaultVoice()
+                                }
+                            }, 100) // 100ms delay
                         } else {
                             // Completed all steps
                             if (stackView) {
@@ -563,9 +827,39 @@ Item {
                     }
                 }
 
+                // Play Voice button
+                Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+                    text: "🔊 Phát âm thanh"
+                    enabled: careSteps.length > 0
+                    
+                    background: Rectangle {
+                        color: parent.enabled ? (parent.pressed ? "#9b59b6" : "#8e44ad") : "#bdc3c7"
+                        radius: 8
+                    }
+                    
+                    contentItem: Text {
+                        text: parent.text
+                        color: parent.enabled ? "#ffffff" : "#7f8c8d"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 14
+                        font.bold: true
+                    }
+
+                    onClicked: {
+                        if (careSteps.length > 0) {
+                            // Try to get voice data from current step (if available)
+                            var currentStep = careSteps[currentStepIndex]
+                            var voiceBase64 = currentStep.voiceBase64 || ""
+                            playVoiceFromBase64(voiceBase64)
+                        }
+                    }
+                }
+
                 // Debug button
                 // Button for debugging: shows all current care steps in the console
-                /*
                 Button {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
@@ -589,7 +883,6 @@ Item {
                         debugAllSteps()
                     }
                 }
-                */
 
                 // Force Process Buffer button
                 /*
@@ -786,6 +1079,7 @@ Item {
                 stepNumber: tssSocketBridge.currentStepNumber,
                 stepDescription: tssSocketBridge.currentStepDescription,
                 imageBase64: tssSocketBridge.currentImageBase64,
+                voiceBase64: tssSocketBridge.currentAudioBase64 || "",
                 timestamp: Date.now()
             }
             
@@ -815,16 +1109,29 @@ Item {
             addStepToBuffer(
                 tssSocketBridge.currentStepNumber,
                 tssSocketBridge.currentStepDescription,
-                tssSocketBridge.currentImageBase64
+                tssSocketBridge.currentImageBase64,
+                tssSocketBridge.currentAudioBase64
             )
             
             // If this is step 1, process all received steps immediately
             if (tssSocketBridge.currentStepNumber === 1) {
                 console.log("CareStepsScreen: Step 1 received, processing all received steps immediately")
+                console.log("CareStepsScreen: Step 1 audio base64 length:", tssSocketBridge.currentAudioBase64.length)
+                console.log("CareStepsScreen: Step 1 audio base64 preview:", tssSocketBridge.currentAudioBase64.substring(0, 100) + "...")
+                
                 if (stepBufferTimer) {
                     stepBufferTimer.stop()
                 }
                 processAllReceivedSteps()
+                
+                // Auto-play voice for step 1
+                if (tssSocketBridge.currentAudioBase64 && tssSocketBridge.currentAudioBase64.length > 0) {
+                    console.log("CareStepsScreen: Auto-playing voice for step 1")
+                    console.log("CareStepsScreen: Step 1 voice data length:", tssSocketBridge.currentAudioBase64.length)
+                    playVoiceFromBase64(tssSocketBridge.currentAudioBase64)
+                } else {
+                    console.log("CareStepsScreen: Step 1 has no audio data, will play default voice")
+                }
             } else {
                 console.log("CareStepsScreen: Step", tssSocketBridge.currentStepNumber, "added to buffer, waiting for more steps...")
             }
@@ -863,6 +1170,7 @@ Item {
                 stepNumber: tssSocketBridge.currentStepNumber,
                 stepDescription: tssSocketBridge.currentStepDescription,
                 imageBase64: tssSocketBridge.currentImageBase64,
+                voiceBase64: tssSocketBridge.currentAudioBase64 || "",
                 timestamp: Date.now()
             }
             allReceivedSteps.push(stepData)

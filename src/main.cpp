@@ -7,6 +7,7 @@
 #include "../include/websocketbridge.h"
 #include "../include/tsssocketbridge.h"
 #include "../include/audiomanager.h"
+#include "../include/filehelper.h"
 
 int main(int argc, char *argv[])
 {
@@ -18,6 +19,9 @@ int main(int argc, char *argv[])
     // Register AudioManager for QML
     qmlRegisterType<AudioManager>("AudioController", 1, 0, "AudioController");
     
+    // Register FileHelper for QML
+    qmlRegisterType<FileHelper>("FileHelper", 1, 0, "FileHelper");
+    
     QQmlApplicationEngine engine;
     
     // Create WebSocket bridge with proper parent
@@ -26,11 +30,17 @@ int main(int argc, char *argv[])
     // Create TSS Socket bridge with proper parent
     TSSSocketBridge *tssSocketBridge = new TSSSocketBridge(&app);
     
+    // Create FileHelper with proper parent
+    FileHelper *fileHelper = new FileHelper(&app);
+    
     // Expose WebSocket bridge to QML
     engine.rootContext()->setContextProperty("websocketBridge", websocketBridge);
     
     // Expose TSS Socket bridge to QML
     engine.rootContext()->setContextProperty("tssSocketBridge", tssSocketBridge);
+    
+    // Expose FileHelper to QML
+    engine.rootContext()->setContextProperty("fileHelper", fileHelper);
     
     // Set up error handling for QML warnings and errors
     QObject::connect(&engine, &QQmlApplicationEngine::warnings,

@@ -28,9 +28,11 @@ set(SOURCES
     src/websocketbridge.cpp
     src/tsssocketbridge.cpp
     src/audiomanager.cpp
+    src/filehelper.cpp
     include/websocketbridge.h
     include/tsssocketbridge.h
     include/audiomanager.h
+    include/filehelper.h
 )
 
 # Form files - only add if file exists

@@ -26,6 +26,7 @@ public:
     // Base64 encoding/decoding functions
     Q_INVOKABLE QString getAudioAsBase64() const;
     Q_INVOKABLE bool loadFromBase64(const QString &base64Data);
+    Q_INVOKABLE bool loadFromByteArray(const QByteArray &audioData);
     Q_INVOKABLE QString getWavAsBase64() const;
 
     // SỬA: Thêm const và chỉ khai báo, implementation trong .cpp
