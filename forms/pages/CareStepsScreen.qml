@@ -564,6 +564,8 @@ Item {
                 }
 
                 // Debug button
+                // Button for debugging: shows all current care steps in the console
+                /*
                 Button {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
@@ -587,8 +589,10 @@ Item {
                         debugAllSteps()
                     }
                 }
+                */
 
                 // Force Process Buffer button
+                /*
                 Button {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
@@ -619,8 +623,10 @@ Item {
                         }
                     }
                 }
+                */
 
                 // Check Missing Steps button
+                /*
                 Button {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
@@ -644,8 +650,10 @@ Item {
                         checkForMissingSteps()
                     }
                 }
+                */
 
                 // Process All Received Steps button
+                /*
                 Button {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
@@ -673,6 +681,7 @@ Item {
                         }
                     }
                 }
+                */
 
                 // Home button
                 Button {
