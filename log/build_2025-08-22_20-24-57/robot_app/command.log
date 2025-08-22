@@ -1,0 +1,4 @@
+Invoking command in '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/naiscorpjetsonorinnx/Desktop/robot_app -DCMAKE_INSTALL_PREFIX=/home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app
+Invoked command in '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/naiscorpjetsonorinnx/Desktop/robot_app -DCMAKE_INSTALL_PREFIX=/home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app
+Invoking command in '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app -- -j8 -l8
+Invoked command in '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app' returned '2': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app -- -j8 -l8

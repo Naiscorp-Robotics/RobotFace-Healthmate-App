@@ -1,0 +1,32 @@
+[0.022s] Invoking command in '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app -- -j8 -l8
+[0.132s] [  8%] [34m[1mAutomatic MOC for target robot_app[0m
+[0.185s] [  8%] Built target robot_app_autogen
+[0.217s] [ 16%] [34m[1mAutomatic RCC for forms/resources.qrc[0m
+[1.564s] [35m[1mConsolidate compiler generated dependencies of target robot_app[0m
+[1.642s] [ 25%] [32mBuilding CXX object CMakeFiles/robot_app.dir/robot_app_autogen/QM7UNKGVG2/qrc_resources.cpp.o[0m
+[50.986s] [ 33%] [32m[1mLinking CXX executable robot_app[0m
+[56.125s] [100%] Built target robot_app
+[56.155s] Invoked command in '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app -- -j8 -l8
+[56.179s] Invoking command in '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app
+[56.196s] -- Install configuration: ""
+[56.196s] -- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/lib/robot_app/robot_app
+[56.240s] -- Set runtime path of "/home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/lib/robot_app/robot_app" to ""
+[56.240s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/launch
+[56.240s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/launch/robot_face_app.launch.py
+[56.240s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/launch/integrated_map_system.launch.py
+[56.240s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/ament_index/resource_index/package_run_dependencies/robot_app
+[56.241s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/ament_index/resource_index/parent_prefix_path/robot_app
+[56.241s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/ament_prefix_path.sh
+[56.241s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/ament_prefix_path.dsv
+[56.241s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/path.sh
+[56.241s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/path.dsv
+[56.241s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.bash
+[56.241s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.sh
+[56.241s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.zsh
+[56.241s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.dsv
+[56.242s] -- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/package.dsv
+[56.242s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/ament_index/resource_index/packages/robot_app
+[56.242s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/cmake/robot_appConfig.cmake
+[56.242s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/cmake/robot_appConfig-version.cmake
+[56.242s] -- Up-to-date: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/package.xml
+[56.246s] Invoked command in '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app

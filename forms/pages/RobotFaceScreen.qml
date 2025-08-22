@@ -157,29 +157,9 @@ Item {
                     Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 40
-                        text: "🗺️ Bản đồ"
-                        background: Rectangle {
-                            color: parent.pressed ? "#27ae60" : "#2ecc71"
-                            radius: 8
-                        }
-                        contentItem: Text {
-                            text: parent.text
-                            color: "#ffffff"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            font.pixelSize: 13
-                            font.bold: true
-                        }
-
-                        onClicked: {
-                            if (root.stackView) {
-                                root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
-                                    "stackView": root.stackView,
-                                    "mapBridge": globalMapBridge
-                                })
-                            }
-                        }
                     }
+
+                    // Map button
                 }
 
             }
@@ -216,6 +196,19 @@ Item {
     transformOrigin: Item.Center
     layer.enabled: true
     layer.smooth: true
+
+    // Thêm sự kiện click để mở bản đồ
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            if (root.stackView) {
+                root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
+                    "stackView": root.stackView,
+                    "mapBridge": globalMapBridge
+                })
+            }
+        }
+    }
 
     // Ảnh nguồn (ẩn), chừa 4px để không che viền
     Image {
@@ -264,9 +257,17 @@ Item {
             minimapContainer.scale = 1.0
             minimapContainer.border.color = "#34495e"
         }
+        //onClicked: {
+            //if (root.stackView) {
+             //   root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), { "stackView": root.stackView })
+            //}
+        //}
         onClicked: {
             if (root.stackView) {
-                root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), { "stackView": root.stackView })
+                root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
+                "stackView": root.stackView,
+                "mapBridge": globalMapBridge
+                })
             }
         }
     }

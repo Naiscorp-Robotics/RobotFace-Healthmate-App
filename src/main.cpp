@@ -37,10 +37,21 @@ int main(int argc, char *argv[])
     // Create TSS Socket bridge with proper parent
     TSSSocketBridge *tssSocketBridge = new TSSSocketBridge(&app);
     
+    // Create ROS2 Map bridge
+    Ros2MapBridge *mapBridge = new Ros2MapBridge(&app);
+    
+    // Create and register image provider
+    MapImageProvider *imageProvider = new MapImageProvider();
+    mapBridge->setImageProvider(imageProvider);
+    engine.addImageProvider("mapprovider", imageProvider);
+    
+    // Register Ros2MapBridge as QML type for image provider
+    qmlRegisterType<Ros2MapBridge>("RobotApp", 1, 0, "Ros2MapBridge");
+    
     // Create FileHelper with proper parent
     FileHelper *fileHelper = new FileHelper(&app);
     
-    // Expose WebSocket bridge to QML
+    // Expose bridges to QML
     engine.rootContext()->setContextProperty("websocketBridge", websocketBridge);
     engine.rootContext()->setContextProperty("globalMapBridge", mapBridge);
     

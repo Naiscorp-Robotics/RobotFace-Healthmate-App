@@ -1,0 +1,27 @@
+[  8%] [34m[1mAutomatic MOC for target robot_app[0m
+[  8%] Built target robot_app_autogen
+[35m[1mConsolidate compiler generated dependencies of target robot_app[0m
+[ 16%] [32mBuilding CXX object CMakeFiles/robot_app.dir/src/main.cpp.o[0m
+[ 25%] [32m[1mLinking CXX executable robot_app[0m
+[100%] Built target robot_app
+-- Install configuration: ""
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/lib/robot_app/robot_app
+-- Set runtime path of "/home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/lib/robot_app/robot_app" to ""
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/launch
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/launch/robot_face_app.launch.py
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/launch/integrated_map_system.launch.py
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/ament_index/resource_index/package_run_dependencies/robot_app
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/ament_index/resource_index/parent_prefix_path/robot_app
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/ament_prefix_path.sh
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/ament_prefix_path.dsv
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/path.sh
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/path.dsv
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.bash
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.sh
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.zsh
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.dsv
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/package.dsv
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/ament_index/resource_index/packages/robot_app
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/cmake/robot_appConfig.cmake
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/cmake/robot_appConfig-version.cmake
+-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/package.xml

@@ -1,0 +1,9 @@
+[01m[K/home/naiscorpjetsonorinnx/Desktop/robot_app/src/main.cpp:[m[K In function ‘[01m[Kint main(int, char**)[m[K’:
+[01m[K/home/naiscorpjetsonorinnx/Desktop/robot_app/src/main.cpp:45:65:[m[K [01;31m[Kerror: [m[K‘[01m[KmapBridge[m[K’ was not declared in this scope; did you mean ‘[01m[KRos2MapBridge[m[K’?
+   45 |     engine.rootContext()->setContextProperty("globalMapBridge", [01;31m[KmapBridge[m[K);
+      |                                                                 [01;31m[K^~~~~~~~~[m[K
+      |                                                                 [32m[KRos2MapBridge[m[K
+gmake[2]: *** [CMakeFiles/robot_app.dir/build.make:115: CMakeFiles/robot_app.dir/src/main.cpp.o] Error 1
+gmake[2]: *** Waiting for unfinished jobs....
+gmake[1]: *** [CMakeFiles/Makefile2:138: CMakeFiles/robot_app.dir/all] Error 2
+gmake: *** [Makefile:146: all] Error 2

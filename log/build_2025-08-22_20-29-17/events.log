@@ -1,0 +1,185 @@
+[0.000000] (-) TimerEvent: {}
+[0.000673] (robot_app) JobQueued: {'identifier': 'robot_app', 'dependencies': OrderedDict()}
+[0.001161] (robot_app) JobStarted: {'identifier': 'robot_app'}
+[0.013567] (robot_app) JobProgress: {'identifier': 'robot_app', 'progress': 'cmake'}
+[0.014781] (robot_app) JobProgress: {'identifier': 'robot_app', 'progress': 'build'}
+[0.016053] (robot_app) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app', '--', '-j8', '-l8'], 'cwd': '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'naiscorpjetsonorinnx'), ('SSH_CLIENT', '10.241.161.110 61870 22'), ('XDG_SESSION_TYPE', 'tty'), ('GIT_ASKPASS', '/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/extensions/git/dist/askpass.sh'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/targets/aarch64-linux/lib:/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/targets/aarch64-linux/lib:/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/targets/aarch64-linux/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/targets/aarch64-linux/lib:'), ('BROWSER', '/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/bin/helpers/browser.sh'), ('MOTD_SHOWN', 'pam'), ('HOME', '/home/naiscorpjetsonorinnx'), ('TERM_PROGRAM_VERSION', '1.5.3'), ('NVM_BIN', '/home/naiscorpjetsonorinnx/.nvm/versions/node/v20.19.4/bin'), ('VSCODE_IPC_HOOK_CLI', '/run/user/1000/vscode-ipc-29596afa-9cce-45db-b8df-c882a87a7b08.sock'), ('NVM_INC', '/home/naiscorpjetsonorinnx/.nvm/versions/node/v20.19.4/include/node'), ('JETSON_L4T', '36.4.4'), ('ROS_PYTHON_VERSION', '3'), ('CUDA_TOOLKIT_ROOT_DIR', '/usr/local/cuda-12.6'), ('JETSON_MODEL', 'NVIDIA Jetson Orin NX Engineering Reference Developer Kit'), ('VSCODE_GIT_ASKPASS_MAIN', '/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/extensions/git/dist/askpass-main.js'), ('VSCODE_GIT_ASKPASS_NODE', '/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/node'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('NVM_DIR', '/home/naiscorpjetsonorinnx/.nvm'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'naiscorpjetsonorinnx'), ('JETSON_MODULE', 'NVIDIA Jetson Orin NX (16GB ram)'), ('JETSON_SERIAL_NUMBER', '1422424333553'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('ESPEAK_DATA_PATH', '/usr/local/share/espeak-ng-data'), ('TERM', 'xterm-256color'), ('XDG_SESSION_ID', '63'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/usr/local/cuda-12.6/bin:/usr/local/cuda-12.6/bin:/usr/local/cuda-12.6/bin:/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/bin/remote-cli:/home/naiscorpjetsonorinnx/.local/bin:/home/naiscorpjetsonorinnx/.nvm/versions/node/v20.19.4/bin:/usr/local/cuda-12.6/bin:/usr/local/cuda-12.6/bin:/opt/ros/humble/bin:/usr/local/cuda-12.6/bin:/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/bin/remote-cli:/home/naiscorpjetsonorinnx/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('LANG', 'en_US.UTF-8'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('JETSON_SOC', 'tegra234'), ('VSCODE_GIT_IPC_HANDLE', '/run/user/1000/vscode-git-4152f966cb.sock'), ('TERM_PROGRAM', 'vscode'), ('ROS_DOMAIN_ID', '43'), ('AMENT_PREFIX_PATH', '/opt/ros/humble'), ('SHELL', '/bin/bash'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('VSCODE_GIT_ASKPASS_EXTRA_ARGS', ''), ('JETSON_CUDA_ARCH_BIN', '8.7'), ('PWD', '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app'), ('LC_ALL', 'en_US.UTF-8'), ('CUDA_HOME', '/usr/local/cuda-12.6'), ('SSH_CONNECTION', '10.241.161.110 61870 10.241.34.26 22'), ('NVM_CD_FLAGS', ''), ('XDG_DATA_DIRS', '/usr/share/gnome:/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CUDA_PATH', '/usr/local/cuda-12.6'), ('JETSON_JETPACK', ''), ('JETSON_P_NUMBER', 'p3767-0000'), ('CMAKE_PREFIX_PATH', '/opt/ros/humble')]), 'shell': False}
+[0.099357] (-) TimerEvent: {}
+[0.104649] (robot_app) StdoutLine: {'line': b'[  8%] \x1b[34m\x1b[1mAutomatic MOC for target robot_app\x1b[0m\n'}
+[0.146894] (robot_app) StdoutLine: {'line': b'[  8%] Built target robot_app_autogen\n'}
+[0.174673] (robot_app) StdoutLine: {'line': b'\x1b[35m\x1b[1mConsolidate compiler generated dependencies of target robot_app\x1b[0m\n'}
+[0.199487] (-) TimerEvent: {}
+[0.246785] (robot_app) StdoutLine: {'line': b'[ 16%] \x1b[32mBuilding CXX object CMakeFiles/robot_app.dir/src/main.cpp.o\x1b[0m\n'}
+[0.299678] (-) TimerEvent: {}
+[0.400336] (-) TimerEvent: {}
+[0.500970] (-) TimerEvent: {}
+[0.601609] (-) TimerEvent: {}
+[0.702247] (-) TimerEvent: {}
+[0.802899] (-) TimerEvent: {}
+[0.903563] (-) TimerEvent: {}
+[1.004230] (-) TimerEvent: {}
+[1.104862] (-) TimerEvent: {}
+[1.205478] (-) TimerEvent: {}
+[1.306141] (-) TimerEvent: {}
+[1.406801] (-) TimerEvent: {}
+[1.507461] (-) TimerEvent: {}
+[1.608123] (-) TimerEvent: {}
+[1.708759] (-) TimerEvent: {}
+[1.809388] (-) TimerEvent: {}
+[1.910045] (-) TimerEvent: {}
+[2.010720] (-) TimerEvent: {}
+[2.111392] (-) TimerEvent: {}
+[2.212017] (-) TimerEvent: {}
+[2.312638] (-) TimerEvent: {}
+[2.413310] (-) TimerEvent: {}
+[2.513961] (-) TimerEvent: {}
+[2.614837] (-) TimerEvent: {}
+[2.715830] (-) TimerEvent: {}
+[2.816499] (-) TimerEvent: {}
+[2.917207] (-) TimerEvent: {}
+[3.017869] (-) TimerEvent: {}
+[3.118516] (-) TimerEvent: {}
+[3.219132] (-) TimerEvent: {}
+[3.319787] (-) TimerEvent: {}
+[3.420428] (-) TimerEvent: {}
+[3.521109] (-) TimerEvent: {}
+[3.621758] (-) TimerEvent: {}
+[3.722377] (-) TimerEvent: {}
+[3.823010] (-) TimerEvent: {}
+[3.923620] (-) TimerEvent: {}
+[4.024329] (-) TimerEvent: {}
+[4.125011] (-) TimerEvent: {}
+[4.225652] (-) TimerEvent: {}
+[4.326296] (-) TimerEvent: {}
+[4.426960] (-) TimerEvent: {}
+[4.527615] (-) TimerEvent: {}
+[4.628280] (-) TimerEvent: {}
+[4.728983] (-) TimerEvent: {}
+[4.829669] (-) TimerEvent: {}
+[4.930315] (-) TimerEvent: {}
+[5.030953] (-) TimerEvent: {}
+[5.131605] (-) TimerEvent: {}
+[5.232245] (-) TimerEvent: {}
+[5.332919] (-) TimerEvent: {}
+[5.433555] (-) TimerEvent: {}
+[5.534194] (-) TimerEvent: {}
+[5.634834] (-) TimerEvent: {}
+[5.735473] (-) TimerEvent: {}
+[5.836110] (-) TimerEvent: {}
+[5.937335] (-) TimerEvent: {}
+[6.037965] (-) TimerEvent: {}
+[6.138601] (-) TimerEvent: {}
+[6.239244] (-) TimerEvent: {}
+[6.339896] (-) TimerEvent: {}
+[6.440562] (-) TimerEvent: {}
+[6.541186] (-) TimerEvent: {}
+[6.641812] (-) TimerEvent: {}
+[6.742443] (-) TimerEvent: {}
+[6.843091] (-) TimerEvent: {}
+[6.943707] (-) TimerEvent: {}
+[7.044323] (-) TimerEvent: {}
+[7.144971] (-) TimerEvent: {}
+[7.245615] (-) TimerEvent: {}
+[7.346284] (-) TimerEvent: {}
+[7.446933] (-) TimerEvent: {}
+[7.547560] (-) TimerEvent: {}
+[7.648225] (-) TimerEvent: {}
+[7.748928] (-) TimerEvent: {}
+[7.849573] (-) TimerEvent: {}
+[7.950202] (-) TimerEvent: {}
+[8.050854] (-) TimerEvent: {}
+[8.151515] (-) TimerEvent: {}
+[8.252166] (-) TimerEvent: {}
+[8.352828] (-) TimerEvent: {}
+[8.453484] (-) TimerEvent: {}
+[8.554143] (-) TimerEvent: {}
+[8.654791] (-) TimerEvent: {}
+[8.755448] (-) TimerEvent: {}
+[8.856115] (-) TimerEvent: {}
+[8.956768] (-) TimerEvent: {}
+[9.057426] (-) TimerEvent: {}
+[9.158083] (-) TimerEvent: {}
+[9.258723] (-) TimerEvent: {}
+[9.359368] (-) TimerEvent: {}
+[9.460008] (-) TimerEvent: {}
+[9.560616] (-) TimerEvent: {}
+[9.661221] (-) TimerEvent: {}
+[9.664622] (robot_app) StdoutLine: {'line': b'[ 25%] \x1b[32m\x1b[1mLinking CXX executable robot_app\x1b[0m\n'}
+[9.761423] (-) TimerEvent: {}
+[9.862262] (-) TimerEvent: {}
+[9.963053] (-) TimerEvent: {}
+[10.064091] (-) TimerEvent: {}
+[10.164923] (-) TimerEvent: {}
+[10.265721] (-) TimerEvent: {}
+[10.366565] (-) TimerEvent: {}
+[10.467414] (-) TimerEvent: {}
+[10.568238] (-) TimerEvent: {}
+[10.669222] (-) TimerEvent: {}
+[10.770061] (-) TimerEvent: {}
+[10.870921] (-) TimerEvent: {}
+[10.971721] (-) TimerEvent: {}
+[11.072789] (-) TimerEvent: {}
+[11.173636] (-) TimerEvent: {}
+[11.274459] (-) TimerEvent: {}
+[11.375338] (-) TimerEvent: {}
+[11.476189] (-) TimerEvent: {}
+[11.576950] (-) TimerEvent: {}
+[11.677831] (-) TimerEvent: {}
+[11.778636] (-) TimerEvent: {}
+[11.879438] (-) TimerEvent: {}
+[11.980812] (-) TimerEvent: {}
+[12.081529] (-) TimerEvent: {}
+[12.182386] (-) TimerEvent: {}
+[12.283271] (-) TimerEvent: {}
+[12.384234] (-) TimerEvent: {}
+[12.485133] (-) TimerEvent: {}
+[12.586006] (-) TimerEvent: {}
+[12.686878] (-) TimerEvent: {}
+[12.787728] (-) TimerEvent: {}
+[12.888622] (-) TimerEvent: {}
+[12.989467] (-) TimerEvent: {}
+[13.090298] (-) TimerEvent: {}
+[13.191121] (-) TimerEvent: {}
+[13.291960] (-) TimerEvent: {}
+[13.392832] (-) TimerEvent: {}
+[13.493674] (-) TimerEvent: {}
+[13.594502] (-) TimerEvent: {}
+[13.695308] (-) TimerEvent: {}
+[13.796112] (-) TimerEvent: {}
+[13.896908] (-) TimerEvent: {}
+[13.997705] (-) TimerEvent: {}
+[14.098519] (-) TimerEvent: {}
+[14.199329] (-) TimerEvent: {}
+[14.300153] (-) TimerEvent: {}
+[14.401016] (-) TimerEvent: {}
+[14.501700] (-) TimerEvent: {}
+[14.546941] (robot_app) StdoutLine: {'line': b'[100%] Built target robot_app\n'}
+[14.571224] (robot_app) CommandEnded: {'returncode': 0}
+[14.573675] (robot_app) JobProgress: {'identifier': 'robot_app', 'progress': 'install'}
+[14.592589] (robot_app) Command: {'cmd': ['/usr/bin/cmake', '--install', '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app'], 'cwd': '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'naiscorpjetsonorinnx'), ('SSH_CLIENT', '10.241.161.110 61870 22'), ('XDG_SESSION_TYPE', 'tty'), ('GIT_ASKPASS', '/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/extensions/git/dist/askpass.sh'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/targets/aarch64-linux/lib:/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/targets/aarch64-linux/lib:/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/targets/aarch64-linux/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/local/cuda-12.6/lib64:/usr/local/cuda-12.6/targets/aarch64-linux/lib:'), ('BROWSER', '/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/bin/helpers/browser.sh'), ('MOTD_SHOWN', 'pam'), ('HOME', '/home/naiscorpjetsonorinnx'), ('TERM_PROGRAM_VERSION', '1.5.3'), ('NVM_BIN', '/home/naiscorpjetsonorinnx/.nvm/versions/node/v20.19.4/bin'), ('VSCODE_IPC_HOOK_CLI', '/run/user/1000/vscode-ipc-29596afa-9cce-45db-b8df-c882a87a7b08.sock'), ('NVM_INC', '/home/naiscorpjetsonorinnx/.nvm/versions/node/v20.19.4/include/node'), ('JETSON_L4T', '36.4.4'), ('ROS_PYTHON_VERSION', '3'), ('CUDA_TOOLKIT_ROOT_DIR', '/usr/local/cuda-12.6'), ('JETSON_MODEL', 'NVIDIA Jetson Orin NX Engineering Reference Developer Kit'), ('VSCODE_GIT_ASKPASS_MAIN', '/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/extensions/git/dist/askpass-main.js'), ('VSCODE_GIT_ASKPASS_NODE', '/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/node'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('NVM_DIR', '/home/naiscorpjetsonorinnx/.nvm'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'naiscorpjetsonorinnx'), ('JETSON_MODULE', 'NVIDIA Jetson Orin NX (16GB ram)'), ('JETSON_SERIAL_NUMBER', '1422424333553'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('ESPEAK_DATA_PATH', '/usr/local/share/espeak-ng-data'), ('TERM', 'xterm-256color'), ('XDG_SESSION_ID', '63'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/usr/local/cuda-12.6/bin:/usr/local/cuda-12.6/bin:/usr/local/cuda-12.6/bin:/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/bin/remote-cli:/home/naiscorpjetsonorinnx/.local/bin:/home/naiscorpjetsonorinnx/.nvm/versions/node/v20.19.4/bin:/usr/local/cuda-12.6/bin:/usr/local/cuda-12.6/bin:/opt/ros/humble/bin:/usr/local/cuda-12.6/bin:/home/naiscorpjetsonorinnx/.cursor-server/bin/aece02022292184bb34fa0c899a97928489b7b70/bin/remote-cli:/home/naiscorpjetsonorinnx/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('LANG', 'en_US.UTF-8'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('JETSON_SOC', 'tegra234'), ('VSCODE_GIT_IPC_HANDLE', '/run/user/1000/vscode-git-4152f966cb.sock'), ('TERM_PROGRAM', 'vscode'), ('ROS_DOMAIN_ID', '43'), ('AMENT_PREFIX_PATH', '/opt/ros/humble'), ('SHELL', '/bin/bash'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('VSCODE_GIT_ASKPASS_EXTRA_ARGS', ''), ('JETSON_CUDA_ARCH_BIN', '8.7'), ('PWD', '/home/naiscorpjetsonorinnx/Desktop/robot_app/build/robot_app'), ('LC_ALL', 'en_US.UTF-8'), ('CUDA_HOME', '/usr/local/cuda-12.6'), ('SSH_CONNECTION', '10.241.161.110 61870 10.241.34.26 22'), ('NVM_CD_FLAGS', ''), ('XDG_DATA_DIRS', '/usr/share/gnome:/usr/local/share:/usr/share:/var/lib/snapd/desktop'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CUDA_PATH', '/usr/local/cuda-12.6'), ('JETSON_JETPACK', ''), ('JETSON_P_NUMBER', 'p3767-0000'), ('CMAKE_PREFIX_PATH', '/opt/ros/humble')]), 'shell': False}
+[14.601808] (-) TimerEvent: {}
+[14.609692] (robot_app) StdoutLine: {'line': b'-- Install configuration: ""\n'}
+[14.610330] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/lib/robot_app/robot_app\n'}
+[14.653915] (robot_app) StdoutLine: {'line': b'-- Set runtime path of "/home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/lib/robot_app/robot_app" to ""\n'}
+[14.654403] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/launch\n'}
+[14.654570] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/launch/robot_face_app.launch.py\n'}
+[14.654714] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/launch/integrated_map_system.launch.py\n'}
+[14.655216] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/ament_index/resource_index/package_run_dependencies/robot_app\n'}
+[14.655422] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/ament_index/resource_index/parent_prefix_path/robot_app\n'}
+[14.655568] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/ament_prefix_path.sh\n'}
+[14.655703] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/ament_prefix_path.dsv\n'}
+[14.656140] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/path.sh\n'}
+[14.656406] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/environment/path.dsv\n'}
+[14.656581] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.bash\n'}
+[14.656737] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.sh\n'}
+[14.656872] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.zsh\n'}
+[14.657478] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/local_setup.dsv\n'}
+[14.657651] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/package.dsv\n'}
+[14.657794] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/ament_index/resource_index/packages/robot_app\n'}
+[14.657925] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/cmake/robot_appConfig.cmake\n'}
+[14.658050] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/cmake/robot_appConfig-version.cmake\n'}
+[14.658819] (robot_app) StdoutLine: {'line': b'-- Installing: /home/naiscorpjetsonorinnx/Desktop/robot_app/install/robot_app/share/robot_app/package.xml\n'}
+[14.661219] (robot_app) CommandEnded: {'returncode': 0}
+[14.702126] (-) TimerEvent: {}
+[14.724950] (robot_app) JobEnded: {'identifier': 'robot_app', 'rc': 0}
+[14.727046] (-) EventReactorShutdown: {}
