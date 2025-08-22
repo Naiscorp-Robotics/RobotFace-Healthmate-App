@@ -163,14 +163,6 @@ Item {
     }
 
     // Hiển thị thông báo nếu video không tải được
-    Text {
-        anchors.centerIn: parent
-        text: "Video không tải được\nVui lòng kiểm tra đường dẫn file"
-        color: "#ffffff"
-        font.pixelSize: 16
-        horizontalAlignment: Text.AlignHCenter
-        visible: false // We'll handle errors via the OptimizedVideoPlayer's error signal
-    }
 
     // Debug info (ẩn khi video hoạt động)
     Text {

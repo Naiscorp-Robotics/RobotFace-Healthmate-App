@@ -6,6 +6,9 @@
 #include <QTimer>
 #include <QFileInfo>
 #include <QTextStream>
+#include <QDataStream>
+#include <QRegularExpression>
+#include <QtEndian>
 
 AudioManager::AudioManager(QObject *parent)
     : QObject(parent)
@@ -79,6 +82,18 @@ bool AudioManager::startCapture()
         m_captureHandle = nullptr;
         return false;
     }
+    
+    // Store actual audio parameters from hardware
+    unsigned int actual_channels;
+    snd_pcm_hw_params_get_channels(hw_params, &actual_channels);
+    m_sampleRate = sample_rate;
+    m_channels = actual_channels;
+    m_bitsPerSample = 16;
+    
+    qDebug() << "AudioManager::startCapture() - Actual audio parameters:";
+    qDebug() << "  - Sample rate:" << m_sampleRate << "Hz";
+    qDebug() << "  - Channels:" << m_channels;
+    qDebug() << "  - Bits per sample:" << m_bitsPerSample;
 
     // Set buffer size
     snd_pcm_uframes_t buffer_size = 1024;
@@ -172,7 +187,7 @@ bool AudioManager::playAudio()
 
     qDebug() << "AudioManager::playAudio() - Starting playback";
     qDebug() << "  - Buffer size:" << m_audioBuffer.size() << "bytes";
-    qDebug() << "  - Estimated duration:" << (m_audioBuffer.size() / (44100 * 2)) << "seconds";
+    qDebug() << "  - Estimated duration:" << calculateDuration(m_audioBuffer.size()) << "seconds";
 
     if (!setupPlayback()) {
         emit errorOccurred("Failed to setup playback");
@@ -244,18 +259,23 @@ bool AudioManager::setupPlayback()
         return false;
     }
 
-    unsigned int sample_rate = 44100;
+    unsigned int sample_rate = m_sampleRate;
     err = snd_pcm_hw_params_set_rate_near(m_playbackHandle, hw_params, &sample_rate, 0);
     if (err < 0) {
         emit errorOccurred(QString("Cannot set playback rate: %1").arg(snd_strerror(err)));
         return false;
     }
 
-    err = snd_pcm_hw_params_set_channels(m_playbackHandle, hw_params, 1);
+    err = snd_pcm_hw_params_set_channels(m_playbackHandle, hw_params, m_channels);
     if (err < 0) {
         emit errorOccurred(QString("Cannot set playback channels: %1").arg(snd_strerror(err)));
         return false;
     }
+    
+    qDebug() << "AudioManager::setupPlayback() - Using audio parameters:";
+    qDebug() << "  - Sample rate:" << sample_rate << "Hz";
+    qDebug() << "  - Channels:" << m_channels;
+    qDebug() << "  - Bits per sample:" << m_bitsPerSample;
 
     err = snd_pcm_hw_params(m_playbackHandle, hw_params);
     if (err < 0) {
@@ -314,37 +334,46 @@ bool AudioManager::saveToFile(const QString &filename)
     qDebug() << "Saving audio file:" << filename;
     qDebug() << "Audio buffer size:" << m_audioBuffer.size() << "bytes";
 
-    // Write WAV header (simplified)
-    // Note: This is a basic implementation, you might want to use a proper WAV library
+    // Write WAV header using actual audio parameters
     QByteArray header(44, 0);
+
+    // Calculate WAV header values using actual parameters
+    const quint16 numChannels = static_cast<quint16>(m_channels);
+    const quint32 sampleRate = static_cast<quint32>(m_sampleRate);
+    const quint16 bitsPerSample = static_cast<quint16>(m_bitsPerSample);
+    const quint16 blockAlign = numChannels * (bitsPerSample / 8);
+    const quint32 byteRate = sampleRate * blockAlign;
+    const quint32 dataSize = m_audioBuffer.size();
+    const quint32 fileSize = 36 + dataSize; // RIFF size
+
+    // Helper functions for endian conversion
+    auto put32 = [&](int off, quint32 v) { 
+        quint32 le = qToLittleEndian(v); 
+        header.replace(off, 4, reinterpret_cast<const char*>(&le), 4); 
+    };
+    auto put16 = [&](int off, quint16 v) { 
+        quint16 le = qToLittleEndian(v); 
+        header.replace(off, 2, reinterpret_cast<const char*>(&le), 2); 
+    };
 
     // RIFF header
     header.replace(0, 4, "RIFF");
-    quint32 fileSize = m_audioBuffer.size() + 36;
-    header.replace(4, 4, reinterpret_cast<const char*>(&fileSize), 4);
+    put32(4, fileSize);
     header.replace(8, 4, "WAVE");
 
     // fmt chunk
     header.replace(12, 4, "fmt ");
-    quint32 fmtSize = 16;
-    header.replace(16, 4, reinterpret_cast<const char*>(&fmtSize), 4);
-    quint16 audioFormat = 1; // PCM
-    header.replace(20, 2, reinterpret_cast<const char*>(&audioFormat), 2);
-    quint16 numChannels = 1;
-    header.replace(22, 2, reinterpret_cast<const char*>(&numChannels), 2);
-    quint32 sampleRate = 44100;
-    header.replace(24, 4, reinterpret_cast<const char*>(&sampleRate), 4);
-    quint32 byteRate = sampleRate * numChannels * 2; // 16-bit = 2 bytes
-    header.replace(28, 4, reinterpret_cast<const char*>(&byteRate), 4);
-    quint16 blockAlign = numChannels * 2;
-    header.replace(32, 2, reinterpret_cast<const char*>(&blockAlign), 2);
-    quint16 bitsPerSample = 16;
-    header.replace(34, 2, reinterpret_cast<const char*>(&bitsPerSample), 2);
-
+    put32(16, 16); // fmt chunk size
+    put16(20, 1);  // PCM format
+    put16(22, numChannels);
+    put32(24, sampleRate);
+    put32(28, byteRate);
+    put16(32, blockAlign);
+    put16(34, bitsPerSample);
+    
     // data chunk
     header.replace(36, 4, "data");
-    quint32 dataSize = m_audioBuffer.size();
-    header.replace(40, 4, reinterpret_cast<const char*>(&dataSize), 4);
+    put32(40, dataSize);
 
     qDebug() << "Writing WAV header, size:" << header.size() << "bytes";
     qint64 headerWritten = file.write(header);
@@ -455,16 +484,23 @@ bool AudioManager::loadFromBase64(const QString &base64Data)
     qDebug() << "  - Base64 string length:" << base64Data.length() << "characters";
     qDebug() << "  - Base64 preview:" << base64Data.left(50) + "...";
     
-    // Validate base64 format
-    if (base64Data.length() < 100) {
+    // Clean up base64 data - remove data URI prefix and whitespace
+    QString cleanBase64 = base64Data.trimmed();
+    cleanBase64.remove(QRegularExpression("^data:audio/[^;]+;base64,", QRegularExpression::CaseInsensitiveOption));
+    cleanBase64.remove(QRegularExpression("\\s+"));
+    
+    qDebug() << "AudioManager::loadFromBase64() - Cleaned base64 length:" << cleanBase64.length() << "characters";
+    
+    // Validate base64 format (more lenient)
+    if (cleanBase64.length() < 100) {
         qDebug() << "AudioManager::loadFromBase64() - Base64 data too short, likely invalid";
         emit errorOccurred("Base64 data too short");
         return false;
     }
     
-    // Check if it's a valid base64 string (only contains valid characters)
+    // Check if it's a valid base64 string (more lenient)
     QRegExp base64Pattern("^[A-Za-z0-9+/]*={0,2}$");
-    if (!base64Pattern.exactMatch(base64Data)) {
+    if (!base64Pattern.exactMatch(cleanBase64)) {
         qDebug() << "AudioManager::loadFromBase64() - Invalid base64 format";
         emit errorOccurred("Invalid base64 format");
         return false;
@@ -473,7 +509,7 @@ bool AudioManager::loadFromBase64(const QString &base64Data)
     // Decode base64 to binary data using optimized method
     QByteArray audioData;
     try {
-        audioData = QByteArray::fromBase64(base64Data.toUtf8());
+        audioData = QByteArray::fromBase64(cleanBase64.toLatin1());
     } catch (...) {
         qDebug() << "AudioManager::loadFromBase64() - Exception during base64 decode";
         emit errorOccurred("Exception during base64 decode");
@@ -487,24 +523,61 @@ bool AudioManager::loadFromBase64(const QString &base64Data)
     }
     
     qDebug() << "AudioManager::loadFromBase64() - Successfully decoded";
-    qDebug() << "  - Decoded audio size:" << audioData.size() << "bytes";
-    qDebug() << "  - Estimated duration:" << (audioData.size() / (44100 * 2)) << "seconds";
+    qDebug() << "  - Decoded data size:" << audioData.size() << "bytes";
+    
+    // Check if this is a WAV file (has WAV header)
+    if (audioData.size() > 44 && audioData.startsWith("RIFF") && audioData.mid(8, 4) == "WAVE") {
+        qDebug() << "AudioManager::loadFromBase64() - Detected WAV format, parsing header";
+        
+        // Parse WAV header to get actual audio parameters
+        const char* p = audioData.constData();
+        
+        // Parse fmt chunk to get audio parameters
+        if (audioData.size() >= 44) {
+            // Read audio format parameters from fmt chunk
+            quint16 numChannels = qFromLittleEndian(*reinterpret_cast<const quint16*>(p + 22));
+            quint32 sampleRate = qFromLittleEndian(*reinterpret_cast<const quint32*>(p + 24));
+            quint16 bitsPerSample = qFromLittleEndian(*reinterpret_cast<const quint16*>(p + 34));
+            
+            qDebug() << "AudioManager::loadFromBase64() - WAV parameters:";
+            qDebug() << "  - Sample rate:" << sampleRate << "Hz";
+            qDebug() << "  - Channels:" << numChannels;
+            qDebug() << "  - Bits per sample:" << bitsPerSample;
+            
+            // Update audio parameters to match WAV file
+            m_sampleRate = sampleRate;
+            m_channels = numChannels;
+            m_bitsPerSample = bitsPerSample;
+        }
+        
+        // Extract audio data (skip 44-byte header)
+        m_audioBuffer = audioData.mid(44);
+        qDebug() << "AudioManager::loadFromBase64() - Extracted audio data size:" << m_audioBuffer.size() << "bytes";
+        qDebug() << "AudioManager::loadFromBase64() - Estimated duration:" << calculateDuration(m_audioBuffer.size()) << "seconds";
+    } else {
+        qDebug() << "AudioManager::loadFromBase64() - Raw audio data (no WAV header)";
+        qDebug() << "AudioManager::loadFromBase64() - Using current audio parameters:";
+        qDebug() << "  - Sample rate:" << m_sampleRate << "Hz";
+        qDebug() << "  - Channels:" << m_channels;
+        qDebug() << "  - Bits per sample:" << m_bitsPerSample;
+        
+        // Raw audio data, use as is
+        m_audioBuffer = audioData;
+        qDebug() << "AudioManager::loadFromBase64() - Estimated duration:" << calculateDuration(m_audioBuffer.size()) << "seconds";
+    }
     
     // Validate audio data size (should be reasonable for audio)
-    if (audioData.size() < 1000) {
+    if (m_audioBuffer.size() < 1000) {
         qDebug() << "AudioManager::loadFromBase64() - Audio data too small, likely invalid";
         emit errorOccurred("Audio data too small");
         return false;
     }
     
-    if (audioData.size() > 10 * 1024 * 1024) { // 10MB limit
+    if (m_audioBuffer.size() > 10 * 1024 * 1024) { // 10MB limit
         qDebug() << "AudioManager::loadFromBase64() - Audio data too large";
         emit errorOccurred("Audio data too large");
         return false;
     }
-    
-    // Store in audio buffer
-    m_audioBuffer = audioData;
     emit hasRecordedDataChanged();
     
     qDebug() << "AudioManager::loadFromBase64() - Audio data loaded successfully";
@@ -520,39 +593,49 @@ QString AudioManager::getWavAsBase64() const
     
     qDebug() << "AudioManager::getWavAsBase64() - Creating WAV file with base64 encoding";
     qDebug() << "  - Audio buffer size:" << m_audioBuffer.size() << "bytes";
-    qDebug() << "  - Sample rate: 44100 Hz, Channels: 1, Bit depth: 16";
+    qDebug() << "  - Sample rate:" << m_sampleRate << " Hz, Channels:" << m_channels << ", Bit depth:" << m_bitsPerSample;
     
-    // Create WAV header + audio data
+    // Create WAV header + audio data using actual audio parameters
     QByteArray wavData;
     QByteArray header(44, 0);
 
+    // Calculate WAV header values using actual parameters
+    const quint16 numChannels = static_cast<quint16>(m_channels);
+    const quint32 sampleRate = static_cast<quint32>(m_sampleRate);
+    const quint16 bitsPerSample = static_cast<quint16>(m_bitsPerSample);
+    const quint16 blockAlign = numChannels * (bitsPerSample / 8);
+    const quint32 byteRate = sampleRate * blockAlign;
+    const quint32 dataSize = m_audioBuffer.size();
+    const quint32 fileSize = 36 + dataSize; // RIFF size
+
+    // Helper functions for endian conversion
+    auto put32 = [&](int off, quint32 v) { 
+        quint32 le = qToLittleEndian(v); 
+        header.replace(off, 4, reinterpret_cast<const char*>(&le), 4); 
+    };
+    auto put16 = [&](int off, quint16 v) { 
+        quint16 le = qToLittleEndian(v); 
+        header.replace(off, 2, reinterpret_cast<const char*>(&le), 2); 
+    };
+
     // RIFF header
     header.replace(0, 4, "RIFF");
-    quint32 fileSize = m_audioBuffer.size() + 36;
-    header.replace(4, 4, reinterpret_cast<const char*>(&fileSize), 4);
+    put32(4, fileSize);
     header.replace(8, 4, "WAVE");
 
     // fmt chunk
     header.replace(12, 4, "fmt ");
-    quint32 fmtSize = 16;
-    header.replace(16, 4, reinterpret_cast<const char*>(&fmtSize), 4);
-    quint16 audioFormat = 1; // PCM
-    header.replace(20, 2, reinterpret_cast<const char*>(&audioFormat), 2);
-    quint16 numChannels = 1;
-    header.replace(22, 2, reinterpret_cast<const char*>(&numChannels), 2);
-    quint32 sampleRate = 44100;
-    header.replace(24, 4, reinterpret_cast<const char*>(&sampleRate), 4);
-    quint32 byteRate = sampleRate * numChannels * 2; // 16-bit = 2 bytes
-    header.replace(28, 4, reinterpret_cast<const char*>(&byteRate), 4);
-    quint16 blockAlign = numChannels * 2;
-    header.replace(32, 2, reinterpret_cast<const char*>(&blockAlign), 2);
-    quint16 bitsPerSample = 16;
-    header.replace(34, 2, reinterpret_cast<const char*>(&bitsPerSample), 2);
-
+    put32(16, 16); // fmt chunk size
+    put16(20, 1);  // PCM format
+    put16(22, numChannels);
+    put32(24, sampleRate);
+    put32(28, byteRate);
+    put16(32, blockAlign);
+    put16(34, bitsPerSample);
+    
     // data chunk
     header.replace(36, 4, "data");
-    quint32 dataSize = m_audioBuffer.size();
-    header.replace(40, 4, reinterpret_cast<const char*>(&dataSize), 4);
+    put32(40, dataSize);
 
     // Combine header + audio data
     wavData = header + m_audioBuffer;
@@ -568,12 +651,23 @@ QString AudioManager::getWavAsBase64() const
     return base64Data;
 }
 
+QString AudioManager::getWavAsDataUri() const
+{
+    QString base64Data = getWavAsBase64();
+    if (base64Data.isEmpty()) {
+        return QString();
+    }
+    
+    // Return as data URI for web usage
+    return QString("data:audio/wav;base64,%1").arg(base64Data);
+}
+
 QString AudioManager::getAudioBufferInfo() const
 {
     QString info = QString("Audio Buffer Info:\n");
     info += QString("- Size: %1 bytes\n").arg(m_audioBuffer.size());
     info += QString("- Empty: %1\n").arg(m_audioBuffer.isEmpty() ? "Yes" : "No");
-    info += QString("- Duration: %1 seconds\n").arg(m_audioBuffer.size() / (44100 * 2)); // 44.1kHz, 16-bit, mono
+    info += QString("- Duration: %1 seconds\n").arg(calculateDuration(m_audioBuffer.size()));
     return info;
 }
 
@@ -674,7 +768,7 @@ bool AudioManager::loadFromByteArray(const QByteArray &audioData)
     
     qDebug() << "AudioManager::loadFromByteArray() - Loading audio data directly";
     qDebug() << "  - Audio data size:" << audioData.size() << "bytes";
-    qDebug() << "  - Estimated duration:" << (audioData.size() / (44100 * 2)) << "seconds";
+    qDebug() << "  - Estimated duration:" << calculateDuration(audioData.size()) << "seconds";
     
     // Validate audio data size
     if (audioData.size() < 1000) {
@@ -695,4 +789,10 @@ bool AudioManager::loadFromByteArray(const QByteArray &audioData)
     
     qDebug() << "AudioManager::loadFromByteArray() - Audio data loaded successfully";
     return true;
+}
+
+// Helper function to calculate audio duration
+double AudioManager::calculateDuration(int bufferSize) const {
+    const int bytesPerSample = m_bitsPerSample / 8;
+    return static_cast<double>(bufferSize) / (m_sampleRate * m_channels * bytesPerSample);
 }
