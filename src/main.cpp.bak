@@ -4,18 +4,11 @@
 #include <QDir>
 #include <QDebug>
 #include "../include/websocketbridge.h"
-#include "../include/ros2mapbridge.h"
-#include "../include/mapimageprovider.h"
-#include <rclcpp/rclcpp.hpp>
 
 int main(int argc, char *argv[])
 {
     // Enable high DPI support (must be set before creating QApplication)
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    
-    // Initialize ROS2 before Qt application
-    // This allows ROS2 to handle its command line arguments
-    rclcpp::init(argc, argv);
     
     QGuiApplication app(argc, argv);
     
@@ -24,20 +17,8 @@ int main(int argc, char *argv[])
     // Create WebSocket bridge with proper parent
     WebSocketBridge *websocketBridge = new WebSocketBridge(&app);
     
-    // Create ROS2 Map bridge
-    Ros2MapBridge *mapBridge = new Ros2MapBridge(&app);
-    
-    // Create and register image provider
-    MapImageProvider *imageProvider = new MapImageProvider();
-    mapBridge->setImageProvider(imageProvider);
-    engine.addImageProvider("mapprovider", imageProvider);
-    
-    // Register Ros2MapBridge as QML type for image provider
-    qmlRegisterType<Ros2MapBridge>("RobotApp", 1, 0, "Ros2MapBridge");
-    
-    // Expose bridges to QML
+    // Expose WebSocket bridge to QML
     engine.rootContext()->setContextProperty("websocketBridge", websocketBridge);
-    engine.rootContext()->setContextProperty("globalMapBridge", mapBridge);
     
     // Set up error handling for QML warnings and errors
     QObject::connect(&engine, &QQmlApplicationEngine::warnings,
@@ -87,10 +68,5 @@ int main(int argc, char *argv[])
         return -1;
     }
     
-    int result = app.exec();
-    
-    // Shutdown ROS2
-    rclcpp::shutdown();
-    
-    return result;
+    return app.exec();
 }

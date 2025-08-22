@@ -192,11 +192,38 @@ Item {
                         }
 
                         onClicked: {
+                        onClicked: {
                             if (root.stackView) {
                                 root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
                                     "stackView": root.stackView,
                                     "mapBridge": globalMapBridge
                                 })
+                            }
+                        }
+                        onClicked: {
+                            if (root.stackView) {
+                                root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
+                                    "stackView": root.stackView,
+                                    "mapBridge": globalMapBridge
+                                })
+                            }
+                        }
+                        onClicked: {
+                            if (root.stackView) {
+                                root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
+                                    "stackView": root.stackView,
+                                    "mapBridge": globalMapBridge
+                                })
+                            }
+                        }
+                        onClicked: {
+                            if (root.stackView) {
+                                root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
+                                    "stackView": root.stackView,
+                                    "mapBridge": globalMapBridge
+                                })
+                            }
+                        }
                             }
                         }
                     }

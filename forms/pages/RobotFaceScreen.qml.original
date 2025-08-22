@@ -196,6 +196,7 @@ Item {
                                 root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
                                     "stackView": root.stackView,
                                     "mapBridge": globalMapBridge
+                                    "stackView": root.stackView
                                 })
                             }
                         }
