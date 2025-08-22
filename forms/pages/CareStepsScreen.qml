@@ -70,32 +70,9 @@ Item {
     // Audio Controller
     AudioController {
         id: voicePlayer
-        onErrorOccurred: function(message) {
-            console.log("Voice Player Error:", message)
-            voiceStatus.text = "❌ Lỗi: " + message
-            voiceStatus.color = "#e74c3c"
-        }
-        onAudioPlayed: {
-            console.log("Voice playback completed")
-            voiceStatus.text = "✅ Phát âm thanh hoàn thành"
-            voiceStatus.color = "#27ae60"
-        }
+        
     }
     
-    // Voice status indicator
-    Text {
-        id: voiceStatus
-        anchors.top: header.bottom
-        anchors.left: parent.left
-        anchors.margins: 10
-        anchors.topMargin: 15
-        text: "🔊 Sẵn sàng phát âm thanh"
-        color: "#3498db"
-        font.pixelSize: 12
-        font.bold: true
-        z: 10
-    }
-
     // ======= Audio helpers (giữ nguyên logic của bạn) =======
     function playVoiceFromBase64Optimized(voiceBase64) {
         console.log("CareStepsScreen: Attempting to play voice from base64 (optimized)")
@@ -104,13 +81,9 @@ Item {
             console.log("CareStepsScreen: Using base64 data directly from server (optimized)")
             console.log("CareStepsScreen: Base64 length:", voiceBase64.length)
             if (voiceBase64.length < 100) { playDefaultVoice(); return }
-            voiceStatus.text = "🔄 Đang phát âm thanh từ server..."
-            voiceStatus.color = "#f39c12"
             if (voicePlayer.loadFromBase64(voiceBase64)) voicePlayer.playAudio()
             else playDefaultVoice()
         } else {
-            voiceStatus.text = "🔄 Đang phát âm thanh mặc định..."
-            voiceStatus.color = "#f39c12"
             playDefaultVoice()
         }
     }
@@ -127,13 +100,9 @@ Item {
                 playDefaultVoice()
                 return
             }
-            voiceStatus.text = "🔄 Đang phát âm thanh từ server..."
-            voiceStatus.color = "#f39c12"
             if (voicePlayer.loadFromBase64(voiceBase64)) voicePlayer.playAudio()
             else { voiceStatus.text = "❌ Không thể phát âm thanh từ server"; voiceStatus.color = "#e74c3c"; playDefaultVoice() }
         } else {
-            voiceStatus.text = "🔄 Đang phát âm thanh mặc định..."
-            voiceStatus.color = "#f39c12"
             playDefaultVoice()
         }
     }
@@ -175,8 +144,6 @@ Item {
         xhr.send()
     }
     function playDefaultVoiceFallback() {
-        voiceStatus.text = "🔄 Đang phát âm thanh mặc định (fallback)..."
-        voiceStatus.color = "#f39c12"
         var fallbackBase64 = "UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT"
         if (voicePlayer.loadFromBase64(fallbackBase64)) voicePlayer.playAudio()
         else { voiceStatus.text = "❌ Không thể phát âm thanh mặc định"; voiceStatus.color = "#e74c3c" }
@@ -410,29 +377,6 @@ Item {
                     }
                 }
 
-                Button {
-                    Layout.fillWidth: true; Layout.preferredHeight: 40
-                    text: "🔊 Phát âm thanh"; enabled: careSteps.length > 0
-                    background: Rectangle { color: parent.enabled ? (parent.pressed ? "#9b59b6" : "#8e44ad") : "#bdc3c7"; radius: 8 }
-                    contentItem: Text { text: parent.text; color: parent.enabled ? "#ffffff" : "#7f8c8d"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.pixelSize: 14; font.bold: true }
-                    onClicked: { playForCurrentStep() }
-                }
-
-                Button {
-                    Layout.fillWidth: true; Layout.preferredHeight: 40
-                    text: "🐛 Debug"
-                    background: Rectangle { color: parent.pressed ? "#9b59b6" : "#8e44ad"; radius: 8 }
-                    contentItem: Text { text: parent.text; color: "#ffffff"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.pixelSize: 14; font.bold: true }
-                    onClicked: { debugAllSteps() }
-                }
-
-                Button {
-                    Layout.fillWidth: true; Layout.preferredHeight: 40
-                    text: "🔄 Force Process All Steps"
-                    background: Rectangle { color: parent.pressed ? "#8e44ad" : "#9b59b6"; radius: 8 }
-                    contentItem: Text { text: parent.text; color: "#ffffff"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.pixelSize: 14; font.bold: true }
-                    onClicked: { processAllReceivedSteps() }
-                }
 
                 Button {
                     Layout.fillWidth: true; Layout.preferredHeight: 40
@@ -442,57 +386,6 @@ Item {
                     onClicked: { if (stackView) stackView.pop(stackView.get(0)) }
                 }
 
-                Button {
-                    Layout.fillWidth: true; Layout.preferredHeight: 40
-                    text: "🔍 Debug TSS Data"
-                    background: Rectangle { color: parent.pressed ? "#e67e22" : "#d35400"; radius: 8 }
-                    contentItem: Text { text: parent.text; color: "#ffffff"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.pixelSize: 14; font.bold: true }
-                    onClicked: {
-                        console.log("=== DEBUG TSS SOCKET BRIDGE DATA ===")
-                        console.log("Is Connected:", tssSocketBridge.isConnected)
-                        console.log("Current Step Number:", tssSocketBridge.currentStepNumber)
-                        console.log("Current Step Description:", tssSocketBridge.currentStepDescription)
-                        console.log("Image Base64 Length:", tssSocketBridge.currentImageBase64 ? tssSocketBridge.currentImageBase64.length : 0)
-                        console.log("Audio Base64 Length:", tssSocketBridge.currentAudioBase64 ? tssSocketBridge.currentAudioBase64.length : 0)
-                        console.log("Audio Base64 Preview:", tssSocketBridge.currentAudioBase64 ? tssSocketBridge.currentAudioBase64.substring(0, 100) + "..." : "null")
-                        console.log("=====================================")
-                    }
-                }
-
-                Button {
-                    Layout.fillWidth: true; Layout.preferredHeight: 40
-                    text: "🔄 Test Request Step 1"
-                    background: Rectangle { color: parent.pressed ? "#16a085" : "#1abc9c"; radius: 8 }
-                    contentItem: Text { text: parent.text; color: "#ffffff"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.pixelSize: 14; font.bold: true }
-                    onClicked: { if (tssSocketBridge) tssSocketBridge.sendStepRequest(1, "Test step description") }
-                }
-
-                Button {
-                    Layout.fillWidth: true; Layout.preferredHeight: 40
-                    text: "🔊 Test Direct Audio"
-                    background: Rectangle { color: parent.pressed ? "#e74c3c" : "#c0392b"; radius: 8 }
-                    contentItem: Text { text: parent.text; color: "#ffffff"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.pixelSize: 14; font.bold: true }
-                    onClicked: { if (tssSocketBridge && tssSocketBridge.currentAudioBase64) playVoiceFromBase64(tssSocketBridge.currentAudioBase64) }
-                }
-
-                Button {
-                    Layout.fillWidth: true; Layout.preferredHeight: 40
-                    text: "🧪 Test Create StepData"
-                    background: Rectangle { color: parent.pressed ? "#f39c12" : "#e67e22"; radius: 8 }
-                    contentItem: Text { text: parent.text; color: "#ffffff"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.pixelSize: 14; font.bold: true }
-                    onClicked: {
-                        if (tssSocketBridge) {
-                            let s = {
-                                stepNumber: tssSocketBridge.currentStepNumber,
-                                stepDescription: tssSocketBridge.currentStepDescription,
-                                imageBase64: tssSocketBridge.currentImageBase64 || "",
-                                voiceBase64: tssSocketBridge.currentAudioBase64 || "",
-                                timestamp: Date.now()
-                            }
-                            console.log("CareStepsScreen: Test stepData created, voice len:", s.voiceBase64.length)
-                        }
-                    }
-                }
             }
         }
     }
