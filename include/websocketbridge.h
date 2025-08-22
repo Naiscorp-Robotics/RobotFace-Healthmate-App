@@ -22,7 +22,7 @@ public:
     Q_INVOKABLE void sendMessage(const QString &message);
     Q_INVOKABLE void autoConnectToServer();
 
-    
+
     bool isConnected() const { return m_webSocket.state() == QAbstractSocket::ConnectedState; }
     QString lastMessage() const { return m_lastMessage; }
     bool autoConnect() const { return m_autoConnect; }

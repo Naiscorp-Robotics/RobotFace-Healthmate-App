@@ -3,10 +3,14 @@
 #include <QQmlContext>
 #include <QDir>
 #include <QDebug>
+#include <QtQml>
 #include "../include/websocketbridge.h"
 #include "../include/ros2mapbridge.h"
 #include "../include/mapimageprovider.h"
 #include <rclcpp/rclcpp.hpp>
+#include "../include/tsssocketbridge.h"
+#include "../include/audiomanager.h"
+#include "../include/filehelper.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,25 +23,32 @@ int main(int argc, char *argv[])
     
     QGuiApplication app(argc, argv);
     
+    // Register AudioManager for QML
+    qmlRegisterType<AudioManager>("AudioController", 1, 0, "AudioController");
+    
+    // Register FileHelper for QML
+    qmlRegisterType<FileHelper>("FileHelper", 1, 0, "FileHelper");
+    
     QQmlApplicationEngine engine;
     
     // Create WebSocket bridge with proper parent
     WebSocketBridge *websocketBridge = new WebSocketBridge(&app);
     
-    // Create ROS2 Map bridge
-    Ros2MapBridge *mapBridge = new Ros2MapBridge(&app);
+    // Create TSS Socket bridge with proper parent
+    TSSSocketBridge *tssSocketBridge = new TSSSocketBridge(&app);
     
-    // Create and register image provider
-    MapImageProvider *imageProvider = new MapImageProvider();
-    mapBridge->setImageProvider(imageProvider);
-    engine.addImageProvider("mapprovider", imageProvider);
+    // Create FileHelper with proper parent
+    FileHelper *fileHelper = new FileHelper(&app);
     
-    // Register Ros2MapBridge as QML type for image provider
-    qmlRegisterType<Ros2MapBridge>("RobotApp", 1, 0, "Ros2MapBridge");
-    
-    // Expose bridges to QML
+    // Expose WebSocket bridge to QML
     engine.rootContext()->setContextProperty("websocketBridge", websocketBridge);
     engine.rootContext()->setContextProperty("globalMapBridge", mapBridge);
+    
+    // Expose TSS Socket bridge to QML
+    engine.rootContext()->setContextProperty("tssSocketBridge", tssSocketBridge);
+    
+    // Expose FileHelper to QML
+    engine.rootContext()->setContextProperty("fileHelper", fileHelper);
     
     // Set up error handling for QML warnings and errors
     QObject::connect(&engine, &QQmlApplicationEngine::warnings,

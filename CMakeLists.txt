@@ -1,11 +1,16 @@
 cmake_minimum_required(VERSION 3.14)
 project(robot_app)
 
+# Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find Qt packages (prioritize Qt5 since it's available)
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Multimedia WebSockets Network)
+
+# Find ALSA library
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(ALSA REQUIRED alsa)
 
 # Find ROS2 packages
 find_package(ament_cmake REQUIRED)
@@ -34,20 +39,59 @@ set(SOURCES
     src/tsssocketbridge.cpp
     src/ros2mapbridge.cpp
     src/mapimageprovider.cpp
+    src/audiomanager.cpp
+    src/filehelper.cpp
     include/websocketbridge.h
     include/tsssocketbridge.h
     include/ros2mapbridge.h
     include/mapimageprovider.h
+    include/audiomanager.h
+    include/filehelper.h
 )
 
+# Form files - only add if file exists
+set(FORMS "")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/mainwindow.ui")
+    list(APPEND FORMS mainwindow.ui)
+endif()
+
+# List QML files for reference
+set(QML_FILES
+    Main.qml
+    components/ControlButton.qml
+    components/InputBox.qml
+    components/RobotEye.qml
+    components/StatusIndicator.qml
+    components/RecordButton.qml
+    components/PlayButton.qml
+    components/AudioLevelMeter.qml
+    components/ErrorPopup.qml
+    components/audioUi.qml
+    pages/ImageScreen.qml
+    pages/ResponseScreen.qml
+    pages/RobotFaceScreen.qml
+)
+
+# Asset files
+set(ASSETS
+    assets/blinking_face.mp4
+    assets/j97.jpg
+)
+
+# Resource files
 set(RESOURCES
     forms/resources.qrc
 )
 
-# Create executable
-add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCES})
+# Create executable với chỉ những file tồn tại
+add_executable(${PROJECT_NAME}
+    ${SOURCES}
+    ${HEADERS}
+    ${FORMS}
+    ${RESOURCES}
+)
 
-# Link Qt5 libraries
+# Link Qt5 libraries and ALSA
 target_link_libraries(${PROJECT_NAME} 
     Qt5::Core 
     Qt5::Gui 
@@ -57,6 +101,7 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::Multimedia
     Qt5::Network
     Qt5::WebSockets
+    ${ALSA_LIBRARIES}
 )
 
 # Link ROS2 dependencies
@@ -69,6 +114,9 @@ ament_target_dependencies(${PROJECT_NAME}
     tf2_geometry_msgs
     std_msgs
 )
+
+# Include ALSA header directories
+target_include_directories(${PROJECT_NAME} PRIVATE ${ALSA_INCLUDE_DIRS})
 
 # Platform-specific settings
 if(WIN32)

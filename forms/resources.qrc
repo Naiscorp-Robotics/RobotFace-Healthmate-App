@@ -13,10 +13,14 @@
         <file>components/WebSocketPanel.qml</file>
         <file>components/TSSSocketPanel.qml</file>
         <file>components/OptimizedVideoPlayer.qml</file>
+        <file>components/AudioManager.qml</file>
     </qresource>
     <qresource prefix="/assets">
         <file alias="blinking_face.mp4">../assets/blinking_face.mp4</file>
         <file alias="j97.jpg">../assets/j97.jpg</file>
         <file alias="map.png">../assets/map.png</file>
+        <file alias="voice_base.txt">../assets/voice_base.txt</file>
+        <file alias="sample1.txt">../assets/sample1.txt</file>
+        <file alias="face.mp4">../assets/face.mp4</file>
     </qresource>
 </RCC>
