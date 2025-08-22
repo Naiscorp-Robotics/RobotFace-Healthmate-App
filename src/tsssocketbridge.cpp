@@ -91,6 +91,9 @@ void TSSSocketBridge::onWebSocketTextMessageReceived(const QString &message)
     if (parseError.error == QJsonParseError::NoError && jsonDoc.isObject()) {
         QJsonObject jsonObj = jsonDoc.object();
         
+        qDebug() << "TSSSocketBridge: Received JSON object with keys:" << jsonObj.keys();
+        qDebug() << "TSSSocketBridge: Full JSON response:" << message;
+        
         // Check if this is a structured step response
         if (jsonObj.contains("step_number") && jsonObj.contains("step_description")) {
             m_currentStepNumber = jsonObj["step_number"].toInt();
@@ -99,31 +102,37 @@ void TSSSocketBridge::onWebSocketTextMessageReceived(const QString &message)
             // Parse image data - check both possible keys
             if (jsonObj.contains("image")) {
                 m_currentImageBase64 = jsonObj["image"].toString();
+                qDebug() << "TSSSocketBridge: Found 'image' key, length:" << m_currentImageBase64.length();
             } else if (jsonObj.contains("img_base64")) {
                 m_currentImageBase64 = jsonObj["img_base64"].toString();
+                qDebug() << "TSSSocketBridge: Found 'img_base64' key, length:" << m_currentImageBase64.length();
             } else {
                 m_currentImageBase64 = "";
+                qDebug() << "TSSSocketBridge: No image key found in JSON response";
             }
             
             // Parse audio data - check both possible keys
             if (jsonObj.contains("audio")) {
                 m_currentAudioBase64 = jsonObj["audio"].toString();
+                qDebug() << "TSSSocketBridge: Found 'audio' key, length:" << m_currentAudioBase64.length();
             } else if (jsonObj.contains("audio_base64")) {
                 m_currentAudioBase64 = jsonObj["audio_base64"].toString();
+                qDebug() << "TSSSocketBridge: Found 'audio_base64' key, length:" << m_currentAudioBase64.length();
             } else {
                 m_currentAudioBase64 = "";
+                qDebug() << "TSSSocketBridge: No audio key found in JSON response";
             }
             
-            // qDebug() << "TSSSocketBridge: Parsed step data:";
-            // qDebug() << "  Step Number:" << m_currentStepNumber;
-            // qDebug() << "  Step Description:" << m_currentStepDescription;
-            // qDebug() << "  Available keys:" << jsonObj.keys();
-            // qDebug() << "  Image key used:" << (jsonObj.contains("image") ? "image" : (jsonObj.contains("img_base64") ? "img_base64" : "none"));
-            // qDebug() << "  Audio key used:" << (jsonObj.contains("audio") ? "audio" : (jsonObj.contains("audio_base64") ? "audio_base64" : "none"));
-            // qDebug() << "  Image Base64 Length:" << m_currentImageBase64.length();
-            // qDebug() << "  Image Base64 Preview:" << m_currentImageBase64.left(50) + "...";
-            // qDebug() << "  Audio Base64 Length:" << m_currentAudioBase64.length();
-            // qDebug() << "  Audio Base64 Preview:" << m_currentAudioBase64.left(50) + "...";
+            qDebug() << "TSSSocketBridge: Parsed step data:";
+            qDebug() << "  Step Number:" << m_currentStepNumber;
+            qDebug() << "  Step Description:" << m_currentStepDescription;
+            qDebug() << "  Available keys:" << jsonObj.keys();
+            qDebug() << "  Image key used:" << (jsonObj.contains("image") ? "image" : (jsonObj.contains("img_base64") ? "img_base64" : "none"));
+            qDebug() << "  Audio key used:" << (jsonObj.contains("audio") ? "audio" : (jsonObj.contains("audio_base64") ? "audio_base64" : "none"));
+            qDebug() << "  Image Base64 Length:" << m_currentImageBase64.length();
+            qDebug() << "  Image Base64 Preview:" << m_currentImageBase64.left(50) + "...";
+            qDebug() << "  Audio Base64 Length:" << m_currentAudioBase64.length();
+            qDebug() << "  Audio Base64 Preview:" << m_currentAudioBase64.left(50) + "...";
             
             emit logMessage("Parsed step data - Step " + QString::number(m_currentStepNumber) + 
                           ": " + m_currentStepDescription);

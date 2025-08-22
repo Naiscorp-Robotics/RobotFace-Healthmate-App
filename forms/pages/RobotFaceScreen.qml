@@ -396,21 +396,41 @@ Item {
         target: tssSocketBridge
 
         function onStepDataChanged() {
-            console.log("RobotFaceScreen: Received TSS step data")
+            console.log("RobotFaceScreen: Received step data change signal")
             console.log("Step Number:", tssSocketBridge.currentStepNumber)
             console.log("Step Description:", tssSocketBridge.currentStepDescription)
+            console.log("Image Base64 Length:", tssSocketBridge.currentImageBase64 ? tssSocketBridge.currentImageBase64.length : 0)
+            console.log("Audio Base64 Length:", tssSocketBridge.currentAudioBase64 ? tssSocketBridge.currentAudioBase64.length : 0)
+            console.log("Audio Base64 Preview:", tssSocketBridge.currentAudioBase64 ? tssSocketBridge.currentAudioBase64.substring(0, 100) + "..." : "null")
             
             // Show the TSS data received indicator
             tssDataIndicator.visible = true
             showAnimation.start()
             
             // Store step data globally
+            console.log("RobotFaceScreen: About to create stepData:")
+            console.log("  - tssSocketBridge.currentAudioBase64:", tssSocketBridge.currentAudioBase64)
+            console.log("  - tssSocketBridge.currentAudioBase64 type:", typeof tssSocketBridge.currentAudioBase64)
+            console.log("  - tssSocketBridge.currentAudioBase64 is null:", tssSocketBridge.currentAudioBase64 === null)
+            console.log("  - tssSocketBridge.currentAudioBase64 is undefined:", tssSocketBridge.currentAudioBase64 === undefined)
+            console.log("  - tssSocketBridge.currentAudioBase64 length:", tssSocketBridge.currentAudioBase64 ? tssSocketBridge.currentAudioBase64.length : 0)
+            
             let stepData = {
                 stepNumber: tssSocketBridge.currentStepNumber,
                 stepDescription: tssSocketBridge.currentStepDescription,
-                imageBase64: tssSocketBridge.currentImageBase64,
+                imageBase64: tssSocketBridge.currentImageBase64 || "",
+                voiceBase64: tssSocketBridge.currentAudioBase64 || "",
                 timestamp: Date.now()
             }
+            
+            console.log("RobotFaceScreen: Created stepData:")
+            console.log("  - stepNumber:", stepData.stepNumber)
+            console.log("  - imageBase64 length:", stepData.imageBase64.length)
+            console.log("  - voiceBase64 length:", stepData.voiceBase64.length)
+            console.log("  - voiceBase64 preview:", stepData.voiceBase64.substring(0, 100) + "...")
+            console.log("  - voiceBase64 is null:", stepData.voiceBase64 === null)
+            console.log("  - voiceBase64 is undefined:", stepData.voiceBase64 === undefined)
+            console.log("  - voiceBase64 type:", typeof stepData.voiceBase64)
             
             // Add to global steps array
             if (!root.globalAllSteps) {
@@ -429,9 +449,11 @@ Item {
             if (existingIndex >= 0) {
                 root.globalAllSteps[existingIndex] = stepData
                 console.log("RobotFaceScreen: Updated existing step", tssSocketBridge.currentStepNumber, "in global steps")
+                console.log("RobotFaceScreen: Updated step voiceBase64 length:", root.globalAllSteps[existingIndex].voiceBase64.length)
             } else {
                 root.globalAllSteps.push(stepData)
                 console.log("RobotFaceScreen: Added new step", tssSocketBridge.currentStepNumber, "to global steps")
+                console.log("RobotFaceScreen: Added step voiceBase64 length:", root.globalAllSteps[root.globalAllSteps.length - 1].voiceBase64.length)
             }
             
             console.log("RobotFaceScreen: Total steps in global:", root.globalAllSteps.length)
