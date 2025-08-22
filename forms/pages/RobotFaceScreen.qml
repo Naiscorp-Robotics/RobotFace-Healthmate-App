@@ -26,7 +26,7 @@ Item {
     OptimizedVideoPlayer {
         id: robotVideo
         anchors.fill: parent
-        source: "qrc:/assets/blinking_face.mp4"
+        source: "qrc:/assets/face.mp4"
         autoPlay: true
         loops: -1 // infinite loops
         

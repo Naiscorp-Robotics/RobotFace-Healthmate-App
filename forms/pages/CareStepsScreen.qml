@@ -326,18 +326,27 @@ Item {
                     text: careSteps.length > 0 ? careSteps[currentStepIndex].title : "Chưa có bước nào"
                     font.pixelSize: 18; font.bold: true; color: "#2c3e50"; wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
-                Rectangle {
-                    Layout.fillWidth: true; Layout.preferredHeight: 200; color: "#f8f9fa"; radius: 8; border.color: "#dee2e6"; border.width: 1
-                    Image {
-                        anchors.fill: parent; anchors.margins: 10
-                        source: careSteps.length > 0 ? careSteps[currentStepIndex].image : ""
-                        fillMode: Image.PreserveAspectFit; smooth: true; antialiasing: true
+                RowLayout {
+                    Layout.fillWidth: true; Layout.fillHeight: true; spacing: 20
+                    
+                    // Image container - left side
+                    Rectangle {
+                        Layout.preferredWidth: parent.width * 0.5; Layout.fillHeight: true
+                        color: "#f8f9fa"; radius: 8; border.color: "#dee2e6"; border.width: 1
+                        Image {
+                            anchors.fill: parent; anchors.margins: 10
+                            source: careSteps.length > 0 ? careSteps[currentStepIndex].image : ""
+                            fillMode: Image.PreserveAspectFit; smooth: true; antialiasing: true
+                        }
                     }
-                }
-                Text {
-                    text: careSteps.length > 0 ? careSteps[currentStepIndex].description : "Vui lòng chờ dữ liệu từ hệ thống..."
-                    font.pixelSize: 14; color: "#34495e"; wrapMode: Text.WordWrap; lineHeight: 1.4
-                    Layout.fillWidth: true; Layout.fillHeight: true
+                    
+                    // Description - right side
+                    Text {
+                        text: careSteps.length > 0 ? careSteps[currentStepIndex].description : "Vui lòng chờ dữ liệu từ hệ thống..."
+                        font.pixelSize: 14; color: "#34495e"; wrapMode: Text.WordWrap; lineHeight: 1.4
+                        Layout.fillWidth: true; Layout.fillHeight: true
+                        verticalAlignment: Text.AlignTop
+                    }
                 }
             }
         }

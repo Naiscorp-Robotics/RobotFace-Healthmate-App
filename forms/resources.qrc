@@ -20,5 +20,6 @@
         <file alias="j97.jpg">../assets/j97.jpg</file>
         <file alias="map.png">../assets/map.png</file>
         <file alias="voice_base.txt">../assets/voice_base.txt</file>
+        <file alias="face.mp4">../assets/face.mp4</file>
     </qresource>
 </RCC>
