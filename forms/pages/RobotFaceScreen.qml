@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.12
 import QtMultimedia 5.12
 import QtQuick.Window 2.12
 import AudioController 1.0
+import QtGraphicalEffects 1.15
 
 import "../components"
 
@@ -152,93 +153,11 @@ Item {
                     Layout.fillWidth: true
                     spacing: 15
 
-                    // Care Steps button
-                    Button {
+                    // Placeholder for layout balance
+                    Item {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 40
-                        text: "📋 Hướng dẫn chăm sóc"
-                        background: Rectangle {
-                            color: parent.pressed ? "#8e44ad" : "#9b59b6"
-                            radius: 8
-                        }
-                        contentItem: Text {
-                            text: parent.text
-                            color: "#ffffff"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            font.pixelSize: 13
-                            font.bold: true
-                        }
-
-                        onClicked: {
-                            if (root.stackView) {
-                                root.stackView.push(Qt.resolvedUrl("CareStepsScreen.qml"), {
-                                    "stackView": root.stackView
-                                })
-                            }
-                        }
-                    }
-
-                    // Map button
-                    Button {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 40
-                        text: "🗺️ Bản đồ"
-                        background: Rectangle {
-                            color: parent.pressed ? "#27ae60" : "#2ecc71"
-                            radius: 8
-                        }
-                        contentItem: Text {
-                            text: parent.text
-                            color: "#ffffff"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            font.pixelSize: 13
-                            font.bold: true
-                        }
-
-                        onClicked: {
-                            if (root.stackView) {
-                                root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), {
-                                    "stackView": root.stackView
-                                })
-                            }
-                        }
                     }
                 }
-
-                // Audio Test button row
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 15
-
-                    Button {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 40
-                        text: "🎤 Audio Recorder"
-                        background: Rectangle {
-                            color: parent.pressed ? "#f39c12" : "#e67e22"
-                            radius: 8
-                        }
-                        contentItem: Text {
-                            text: parent.text
-                            color: "#ffffff"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            font.pixelSize: 13
-                            font.bold: true
-                        }
-
-                        onClicked: {
-                            if (root.stackView) {
-                                root.stackView.push(Qt.resolvedUrl("../components/AudioManager.qml"), {
-                                    "stackView": root.stackView
-                                })
-                            }
-                        }
-                    }
-                }
-
             }
         }
     }
@@ -264,6 +183,82 @@ Item {
         font.pixelSize: 10
         visible: false // Ẩn debug text
     }
+
+    // Minimap hình tròn ở góc trái trên
+    Rectangle {
+    id: minimapContainer
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.margins: 15
+    width: 80; height: 80
+    radius: width / 2
+    color: "#2c3e50"
+    border.color: "#34495e"
+    border.width: 2
+
+    // Đặt transform origin để scale không bị "trôi"
+    transformOrigin: Item.Center
+    layer.enabled: true
+    layer.smooth: true
+
+    // Ảnh nguồn (ẩn), chừa 4px để không che viền
+    Image {
+        id: minimapSrc
+        anchors.fill: parent
+        anchors.margins: 4
+        source: "qrc:/assets/map.png"
+        fillMode: Image.PreserveAspectCrop
+        smooth: true
+        visible: false
+
+        // Debug: báo nếu ảnh không load được
+        onStatusChanged: {
+            if (status === Image.Error) {
+                console.warn("Minimap image failed to load:", source);
+            }
+        }
+    }
+
+    // Mặt nạ tròn (ẩn)
+    Rectangle {
+        id: minimapMask
+        anchors.fill: minimapSrc
+        radius: width / 2
+        color: "white"      // chỉ dùng alpha làm mask
+        visible: false
+    }
+
+    // Kết quả: ảnh cắt theo mặt nạ
+    OpacityMask {
+        anchors.fill: minimapSrc
+        source: minimapSrc
+        maskSource: minimapMask
+    }
+
+    MouseArea {
+        id: hoverArea
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onEntered: {
+            minimapContainer.scale = 1.1
+            minimapContainer.border.color = "#3498db"
+        }
+        onExited: {
+            minimapContainer.scale = 1.0
+            minimapContainer.border.color = "#34495e"
+        }
+        onClicked: {
+            if (root.stackView) {
+                root.stackView.push(Qt.resolvedUrl("MapScreen.qml"), { "stackView": root.stackView })
+            }
+        }
+    }
+
+    Behavior on scale {
+        NumberAnimation { duration: 150; easing.type: Easing.OutQuad }
+    }
+}
 
     // Hàm gửi message
     function handleSendMessage(message) {

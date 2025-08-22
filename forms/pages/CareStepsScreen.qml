@@ -189,7 +189,7 @@ Item {
         let existingIndex = -1
         for (let i = 0; i < careSteps.length; i++) if (careSteps[i].stepNumber === stepNumber) { existingIndex = i; break }
         let stepData = {
-            stepNumber, title: "Bước " + stepNumber + ": " + stepDescription,
+            stepNumber, title: "Bước " + stepNumber + ": ",
             description: stepDescription,
             image: imageBase64 && imageBase64.length > 0 ? "data:image/png;base64," + imageBase64 : "qrc:/assets/j97.jpg",
             imageBase64: imageBase64 || "", voiceBase64: voiceBase64 || ""
